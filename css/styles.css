@@ -68,7 +68,7 @@ body {
   text-align: left;
   background-image: url("img/back.jpg");
   background-attachment: fixed;
-  background-position: center;
+  background-position: center bottom;
   background-repeat: no-repeat;
   background-size: cover;
 }
