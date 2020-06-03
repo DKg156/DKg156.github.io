@@ -67,9 +67,10 @@ body {
   line-height: 1.5;
   color: #212529;
   text-align: left;
-  min-height:200%;
+  min-height:400%;
   background-image: url("img/back.jpg");
   background-attachment: fixed;
+  backgroung-position:center bottom;
 }
 
 [tabindex="-1"]:focus:not(:focus-visible) {
