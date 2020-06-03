@@ -69,7 +69,6 @@ body {
   text-align: left;
   min-height:100%;
   background-image: url("img/back.jpg");
-  background-position: center;
 }
 
 [tabindex="-1"]:focus:not(:focus-visible) {
