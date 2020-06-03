@@ -52,7 +52,6 @@ html {
   line-height: 1.15;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-   min-height: 100vh
 }
 
 article, aside, figcaption, figure, footer, header, hgroup, main, nav, section {
@@ -69,8 +68,7 @@ body {
   color: #212529;
   text-align: left;
   background-image: url("img/back.jpg");
-  background-attachment: fixed;
-  background-position: center bottom;
+  background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
 }
