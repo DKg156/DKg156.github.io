@@ -50,6 +50,7 @@
 html {
   font-family: sans-serif;
   line-height: 1.15;
+  height: 100%;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
@@ -66,6 +67,7 @@ body {
   line-height: 1.5;
   color: #212529;
   text-align: left;
+  min-height:100%;
   background-image: url("img/back.jpg");
 }
 
