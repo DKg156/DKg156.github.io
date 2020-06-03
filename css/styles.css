@@ -69,10 +69,7 @@ body {
   text-align: left;
   min-height:100%;
   background-image: url("img/back.jpg");
-  background-attachment: fixed;
   background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
 }
 
 [tabindex="-1"]:focus:not(:focus-visible) {
