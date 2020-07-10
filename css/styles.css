@@ -64,6 +64,7 @@ body {
   text-align: left;
   min-height:200%;
   background-image: url("img/back.jpg");
+  background-attachment: fixed, scroll;
 }
 
 [tabindex="-1"]:focus:not(:focus-visible) {
