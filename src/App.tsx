@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {ArrowDown,ArrowUp,ArrowUpRight,BrainCircuit,BriefcaseBusiness,Check,ChevronRight,Code2,ExternalLink,Github,GraduationCap,Layers3,Linkedin,Mail,MapPin,Menu,Moon,Search,Sun,X} from 'lucide-react';
 import {education,experience,projects,skillGroups} from './data';
+import SkillsConstellation from './SkillsConstellation';
 
 const nav=['Home','About','Experience','Projects','Skills','Education','Contact'];
 const email='dhruvkhuranag156@gmail.com';
@@ -115,6 +116,48 @@ export default function App(){
      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
    }
  }
+ useEffect(()=>{
+   // Desktop-only pointer interactions; no cursor tracking on touch or reduced motion.
+   const finePointer=window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
+   if(!finePointer.matches)return;
+   const cleanups:Array<()=>void>=[];
+   const add=(element:HTMLElement,event:string,handler:EventListener)=>{
+     element.addEventListener(event,handler);
+     cleanups.push(()=>element.removeEventListener(event,handler));
+   };
+   const magnetic=Array.from(document.querySelectorAll<HTMLElement>('.btn, .connect, .quick-open'));
+   magnetic.forEach(element=>{
+     element.classList.add('magnetic');
+     const move:EventListener=(event)=>{
+       const pointer=event as PointerEvent;
+       const bounds=element.getBoundingClientRect();
+       const x=(pointer.clientX-(bounds.left+bounds.width/2))*.12;
+       const y=(pointer.clientY-(bounds.top+bounds.height/2))*.16;
+       element.style.setProperty('--mag-x',x.toFixed(2)+'px');
+       element.style.setProperty('--mag-y',y.toFixed(2)+'px');
+     };
+     const reset=()=>{element.style.removeProperty('--mag-x');element.style.removeProperty('--mag-y');};
+     add(element,'pointermove',move);
+     add(element,'pointerleave',reset);
+     add(element,'blur',reset);
+     cleanups.push(()=>{element.classList.remove('magnetic');reset();});
+   });
+   const surfaces=Array.from(document.querySelectorAll<HTMLElement>('.project-card, .skill-card, .experience-card, .constellation'));
+   surfaces.forEach(element=>{
+     element.classList.add('spotlight-surface');
+     const move:EventListener=(event)=>{
+       const pointer=event as PointerEvent;
+       const bounds=element.getBoundingClientRect();
+       element.style.setProperty('--spot-x',(pointer.clientX-bounds.left).toFixed(1)+'px');
+       element.style.setProperty('--spot-y',(pointer.clientY-bounds.top).toFixed(1)+'px');
+     };
+     const reset=()=>{element.style.removeProperty('--spot-x');element.style.removeProperty('--spot-y');};
+     add(element,'pointermove',move);
+     add(element,'pointerleave',reset);
+     cleanups.push(()=>{element.classList.remove('spotlight-surface');reset();});
+   });
+   return()=>cleanups.forEach(cleanup=>cleanup());
+ },[]);
  async function copyEmail(){try{await navigator.clipboard.writeText(email);setCopied(true);window.setTimeout(()=>setCopied(false),2200);}catch{window.location.href='mailto:'+email;}}
  return <div className="site">
  <div className="scroll-progress" ref={progressRef} aria-hidden="true"/>
@@ -146,7 +189,7 @@ export default function App(){
  <section id="about" className="section about"><div className="wrap"><Heading index="01" kicker="INTRODUCTION" title="About Me"/><div className="about-grid" data-reveal="up"><div className="about-lead">AI Engineering<br/><span>&amp; Software Systems</span></div><div className="about-text"><p>I specialize in building intelligent systems that connect modern AI research with dependable software engineering. My work spans retrieval-augmented generation, model adaptation, agentic workflows, and LLM inference optimization.</p><p>My foundation in backend engineering and my M.E. in Software Systems help me approach AI with a focus on reliability, architecture, and measurable results.</p><div className="about-actions"><a href="https://github.com/DKg156" target="_blank" rel="noreferrer"><Github size={18}/> GitHub <ArrowUpRight size={15}/></a><a href="https://www.linkedin.com/in/dhruv156" target="_blank" rel="noreferrer"><Linkedin size={18}/> LinkedIn <ArrowUpRight size={15}/></a></div></div></div><div className="stat-line"><div data-reveal="up"><strong>AI + SWE</strong><span>Engineering focus</span></div><div data-reveal="up"><strong>M.E.</strong><span>Software Systems · BITS Pilani</span></div><div data-reveal="up"><strong>3</strong><span>Featured ML projects</span></div></div></div></section>
  <section id="experience" className="section section-alt"><div className="wrap"><Heading index="02" kicker="CAREER" title="Experience" desc="Developing reliable software systems and taking AI applications from experiments to production."/><div className="timeline">{experience.map((job,i)=><article className="timeline-item" data-reveal="left" key={job.company}><div className="timeline-marker">{String(i+1).padStart(2,'0')}</div><div className="experience-card"><div className="job-top"><div><span className="minor">{job.company}</span><h3>{job.role}</h3></div><div className="job-date">{job.time}<small>{job.where}</small></div></div><p>{job.summary}</p><ul>{job.points.map(point=><li key={point}>{point}</li>)}</ul><div className="tags">{job.tags.map(tag=><span key={tag}>{tag}</span>)}</div></div></article>)}</div></div></section>
  <section id="projects" className="section"><div className="wrap"><Heading index="03" kicker="SELECTED WORK" title="Projects" desc="A selection of projects exploring machine learning, computer vision, and intelligent applications."/><div className="filters" role="group" aria-label="Filter projects">{['All','Machine Learning','Applications'].map(c=><button className={filter===c?'active':''} type="button" onClick={()=>setFilter(c)} aria-pressed={filter===c} key={c}>{c}</button>)}</div><div className="project-grid">{projects.filter(p=>filter==='All'||p.category===filter).map(project=><article className={'project-card '+project.color} key={project.name} data-reveal="up"><div className="project-visual"><span className="project-num">{project.number} / PROJECT</span><span className="project-symbol">{project.number==='01'?<BrainCircuit size={66} strokeWidth={1}/>:project.number==='02'?<Layers3 size={66} strokeWidth={1}/>:<Code2 size={66} strokeWidth={1}/>}</span><span className="project-category">{project.category}</span></div><div className="project-body"><div className="minor">{project.type}</div><h3>{project.name}</h3><p>{project.text}</p><div className="tags">{project.tags.map(tag=><span key={tag}>{tag}</span>)}</div>{project.url&&<a className="project-link" href={project.url} target="_blank" rel="noreferrer">View repository <ExternalLink size={16}/></a>}</div></article>)}</div><p className="project-footnote">More projects on <a href="https://github.com/DKg156" target="_blank" rel="noreferrer">GitHub <ArrowUpRight size={14}/></a></p></div></section>
- <section id="skills" className="section section-alt"><div className="wrap"><Heading index="04" kicker="THE TOOLKIT" title="Technical Skills" desc="A carefully chosen mix of AI engineering, development, and infrastructure technologies."/><div className="skills-grid">{skillGroups.map((group,i)=><article className="skill-card" data-reveal="up" key={group.title}><div className="skill-title"><span className="skill-icon">{i===0?<BrainCircuit size={23}/>:i===1?<Layers3 size={23}/>:i===2?<BriefcaseBusiness size={23}/>:<Code2 size={23}/>}</span><h3>{group.title}</h3></div><div className="skill-pills">{group.skills.map(s=><span key={s}>{s}</span>)}</div></article>)}</div></div></section>
+ <section id="skills" className="section section-alt"><div className="wrap"><Heading index="04" kicker="THE TOOLKIT" title="Technical Skills" desc="A carefully chosen mix of AI engineering, development, and infrastructure technologies."/><SkillsConstellation/><div className="skills-grid">{skillGroups.map((group,i)=><article className="skill-card" data-reveal="up" key={group.title}><div className="skill-title"><span className="skill-icon">{i===0?<BrainCircuit size={23}/>:i===1?<Layers3 size={23}/>:i===2?<BriefcaseBusiness size={23}/>:<Code2 size={23}/>}</span><h3>{group.title}</h3></div><div className="skill-pills">{group.skills.map(s=><span key={s}>{s}</span>)}</div></article>)}</div></div></section>
  <section id="education" className="section"><div className="wrap"><Heading index="05" kicker="ACADEMIC JOURNEY" title="Education"/><div className="education-grid">{education.map(item=><article className="education-card" data-reveal="up" key={item.school}><div className="edu-icon"><GraduationCap size={26}/></div><span className="minor">{item.time} · {item.location}</span><h3>{item.school}</h3><p>{item.degree}</p><strong>{item.result}</strong></article>)}</div><div className="certificate" data-reveal="up"><Check size={20}/><div><strong>AWS Certified Cloud Practitioner</strong><span>Cloud fundamentals and infrastructure certification</span></div></div></div></section>
  <section id="contact" className="section contact"><div className="wrap contact-layout" data-reveal="up"><div><div className="eyebrow"><span className="index">06</span> CONTACT</div><h2>Contact Me</h2><p>Interested in AI engineering, research-driven development, or collaborating on a meaningful technical challenge? Let's talk.</p><div className="contact-actions"><a className="btn primary" href={'mailto:'+email}>Say hello <ArrowUpRight size={18}/></a><button type="button" onClick={copyEmail} className="btn outline">{copied?<><Check size={17}/> Copied</>:<><Mail size={17}/> Copy email</>}</button></div></div><div className="contact-panel"><div className="eyebrow">FIND ME ONLINE</div><a href="https://github.com/DKg156" target="_blank" rel="noreferrer"><Github/> GitHub <ArrowUpRight/></a><a href="https://www.linkedin.com/in/dhruv156" target="_blank" rel="noreferrer"><Linkedin/> LinkedIn <ArrowUpRight/></a><a href={'mailto:'+email}><Mail/> Email <ChevronRight/></a></div></div></section>
  </main><footer className="footer"><div className="wrap footer-inner"><span><strong>DK.</strong> Built with React & curiosity.</span><span>© {new Date().getFullYear()} Dhruv Khurana</span><a href="#home" aria-label="Back to top">Back to top <ArrowUp size={16}/></a></div></footer></div>;
