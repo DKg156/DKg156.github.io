@@ -452,3 +452,42 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 @media(prefers-reduced-motion:reduce){
  .constellation-link,.constellation-node,.constellation-hub-core,.spotlight-surface::after,.magnetic{animation:none!important;transition:none!important}
 }
+
+/* Native, keyboard-friendly collapsible constellation: closed by default. */
+.constellation>summary.constellation-header{
+  display:flex;list-style:none;cursor:pointer;user-select:none;
+  align-items:center;min-height:116px;padding:25px 30px;
+  transition:background .25s ease;
+}
+.constellation>summary.constellation-header::-webkit-details-marker{display:none}
+.constellation>summary.constellation-header::marker{content:""}
+.constellation>summary.constellation-header:hover{
+  background:color-mix(in srgb,var(--accent) 6%,transparent);
+}
+.constellation>summary.constellation-header:focus-visible{
+  outline:2px solid var(--accent);outline-offset:-5px;border-radius:16px;
+}
+.constellation-toggle{
+  display:inline-flex;align-items:center;gap:12px;flex-shrink:0;
+  color:var(--accent);font-weight:700;font-size:12px;
+  padding:11px 14px;border:1px solid color-mix(in srgb,var(--accent) 55%,var(--border));
+  border-radius:10px;background:color-mix(in srgb,var(--accent) 10%,transparent);
+}
+.constellation-toggle svg{transition:transform .3s ease}
+.constellation[open] .constellation-toggle svg{transform:rotate(180deg)}
+.constellation[open]>summary.constellation-header{border-bottom:1px solid var(--border)}
+.constellation[open] .constellation-scroller,
+.constellation[open] .constellation-inspector,
+.constellation[open] .constellation-footnote{animation:constellation-unfold .32s ease both}
+@keyframes constellation-unfold{from{opacity:0;transform:translateY(-9px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:550px){
+ .constellation>summary.constellation-header{padding:21px 18px;min-height:112px;gap:12px}
+ .constellation-toggle{gap:6px;padding:10px;font-size:11px}
+ .constellation-toggle span{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .constellation-toggle svg{transition:none!important}
+ .constellation[open] .constellation-scroller,
+ .constellation[open] .constellation-inspector,
+ .constellation[open] .constellation-footnote{animation:none!important}
+}
