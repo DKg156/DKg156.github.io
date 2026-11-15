@@ -22,7 +22,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero{min-height:650px}
 .hero-layout{grid-template-columns:minmax(0,1fr) minmax(250px,330px);gap:52px;padding:88px 0 92px}
 .hero-art{height:370px;min-width:0}
-.portrait-ring{width:238px;height:238px;max-width:100%;padding:9px;border-radius:50%;box-shadow:0 0 65px #8270c126}
+.portrait-ring{width:250px;height:250px;max-width:100%;padding:9px;border-radius:50%;box-shadow:0 0 65px #8270c126}
 .portrait-ring img{border-radius:50%;width:100%;height:100%;object-fit:cover;object-position:center 18%;display:block}
 .float-card.top{right:-8px;top:28px}
 .float-card.bottom{left:-12px;bottom:25px}
