@@ -22,7 +22,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero{min-height:650px}
 .hero-layout{grid-template-columns:minmax(0,1fr) minmax(250px,330px);gap:52px;padding:88px 0 92px}
 .hero-art{height:370px;min-width:0}
-.portrait-ring{width:238px;height:238px;max-width:100%;padding:9px;border-radius:50%;box-shadow:0 0 65px #8270c126}
+.portrait-ring{width:250px;height:250px;max-width:100%;padding:9px;border-radius:50%;box-shadow:0 0 65px #8270c126}
 .portrait-ring img{border-radius:50%;width:100%;height:100%;object-fit:cover;object-position:center 18%;display:block}
 .float-card.top{right:-8px;top:28px}
 .float-card.bottom{left:-12px;bottom:25px}
@@ -72,7 +72,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero-mesh{opacity:.13;background-size:54px 54px}
 .hero-glow-one{opacity:.12}
 .hero-glow-two{opacity:.08}
-.hero-layout,.scroll-cue{position:relative;z-index:2}
+.hero-layout{position:relative;z-index:2}
 .hero-copy{position:relative;z-index:3}
 .hero-art{position:relative;z-index:3}
 .section-alt:after{
@@ -101,7 +101,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero-glow{z-index:1;mix-blend-mode:screen;filter:blur(68px)}
 .hero-glow-one{opacity:.31}
 .hero-glow-two{opacity:.23}
-.hero-layout,.scroll-cue{z-index:3}
+.hero-layout{z-index:3}
 .portrait-ring{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 55px color-mix(in srgb,var(--accent) 22%,transparent)}
 :root[data-theme=light] .hero-glow{mix-blend-mode:multiply;opacity:.13}
 :root[data-theme=light] .hero:after{opacity:.28}
@@ -112,4 +112,132 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 }
 @media(prefers-reduced-motion:reduce){
   .hero-glow,.hero:after{animation:none!important}
+}
+
+/* Motion system v2: a kinetic STEM portfolio, progressively enhanced. */
+.scroll-progress{
+  position:fixed;left:0;right:0;top:0;height:3px;z-index:110;
+  transform-origin:left center;transform:scaleX(0);pointer-events:none;
+  background:linear-gradient(90deg,var(--accent2),var(--accent),#70afff);
+  box-shadow:0 0 12px color-mix(in srgb,var(--accent) 55%,transparent);
+}
+@media(prefers-reduced-motion:no-preference){
+  [data-reveal].reveal-ready{transition-delay:var(--reveal-delay,0ms)}
+  [data-reveal="left"].reveal-ready{transform:translateX(-30px)}
+  [data-reveal="right"].reveal-ready{transform:translateX(30px)}
+  [data-reveal].reveal-ready.is-visible{transform:translate3d(0,0,0)}
+  .hero h1 em{
+    background:linear-gradient(110deg,var(--accent) 7%,#b6a8ff 28%,#72d8e6 47%,var(--accent) 68%,#c4b9ff 90%);
+    background-size:240% 100%;
+    background-clip:text;
+    -webkit-background-clip:text;
+    color:transparent;
+    -webkit-text-fill-color:transparent;
+    animation:headline-aurora 9s ease-in-out infinite alternate;
+  }
+  .hero-kicker .status-dot,.connect .status-dot{animation:status-signal 2.6s ease-in-out infinite}
+  .scroll-cue svg{animation:scroll-invite 2.1s ease-in-out infinite}
+  .portrait-ring{animation:portrait-halo 6.5s ease-in-out infinite alternate}
+  .orbit-ring-a{animation:orbit-spin 48s linear infinite}
+  .orbit-ring-b{animation:orbit-spin-reverse 62s linear infinite}
+  .orbit-particle-a{animation:orbit-point-a 14s ease-in-out infinite alternate}
+  .orbit-particle-b{animation:orbit-point-b 18s ease-in-out infinite alternate}
+}
+@keyframes headline-aurora{from{background-position:0% 50%}to{background-position:100% 50%}}
+@keyframes status-signal{0%,100%{box-shadow:0 0 0 0 #74e2b455,0 0 12px #74e2b4}48%{box-shadow:0 0 0 6px #74e2b400,0 0 20px #74e2b49e}}
+@keyframes scroll-invite{0%,100%{transform:translateY(-2px)}50%{transform:translateY(6px)}}
+@keyframes portrait-halo{0%{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 35px color-mix(in srgb,var(--accent) 18%,transparent)}100%{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent2) 70%,transparent),0 0 80px color-mix(in srgb,var(--accent) 34%,transparent)}}
+@keyframes orbit-spin{to{transform:rotate(360deg)}}
+@keyframes orbit-spin-reverse{to{transform:rotate(-360deg)}}
+@keyframes orbit-point-a{from{transform:translate3d(-7px,8px,0) scale(.8);opacity:.3}to{transform:translate3d(9px,-10px,0) scale(1.2);opacity:1}}
+@keyframes orbit-point-b{from{transform:translate3d(10px,1px,0) scale(.85);opacity:.3}to{transform:translate3d(-7px,-12px,0) scale(1.15);opacity:.85}}
+/* Orbit guides sit behind the portrait and existing floating badges. */
+.hero-art .orbit-ring{
+  position:absolute;pointer-events:none;z-index:1;width:315px;height:315px;border-radius:50%;
+  border:1px dashed color-mix(in srgb,var(--accent) 55%,transparent);
+  box-shadow:inset 0 0 28px color-mix(in srgb,var(--accent) 8%,transparent);
+}
+.hero-art .orbit-ring-a{width:316px;height:316px;border-style:dashed;border-width:1px;opacity:.58}
+.hero-art .orbit-ring-b{
+  width:348px;height:348px;border-color:color-mix(in srgb,var(--accent2) 42%,transparent);
+  border-style:dotted;opacity:.38;
+}
+.hero-art .orbit-ring-b:after{
+  content:"";position:absolute;top:15%;right:15%;width:7px;height:7px;
+  border-radius:50%;background:var(--accent2);box-shadow:0 0 15px var(--accent2);
+}
+.hero-art .orbit-particle{
+  position:absolute;z-index:1;pointer-events:none;width:6px;height:6px;border-radius:50%;
+  background:var(--accent);box-shadow:0 0 10px var(--accent),0 0 22px color-mix(in srgb,var(--accent) 50%,transparent);
+}
+.hero-art .orbit-particle-a{top:12%;left:21%}
+.hero-art .orbit-particle-b{bottom:14%;right:13%;background:var(--accent2);box-shadow:0 0 10px var(--accent2)}
+/* Section headings animate an understated accent rule as each section arrives. */
+.section-heading:after{
+  content:"";display:block;width:80px;height:2px;margin-top:18px;border-radius:5px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));transform-origin:left center;
+}
+@media(prefers-reduced-motion:no-preference){
+  .section-heading.reveal-ready:after{transform:scaleX(.08);opacity:.2;transition:transform .9s cubic-bezier(.17,.67,.28,1),opacity .8s}
+  .section-heading.reveal-ready.is-visible:after{transform:scaleX(1);opacity:1}
+}
+/* Cards and controls have microinteractions, but no animated layout or reflow. */
+.timeline-marker{transition:background .3s,box-shadow .3s,transform .3s}
+.timeline-item:hover .timeline-marker{background:var(--accent);color:var(--bg);box-shadow:0 0 24px color-mix(in srgb,var(--accent) 37%,transparent);transform:scale(1.09)}
+.experience-card,.education-card,.certificate{transition:transform .32s ease,border-color .3s,box-shadow .32s}
+.experience-card:hover,.education-card:hover,.certificate:hover{
+  border-color:color-mix(in srgb,var(--accent) 54%,var(--border));
+  box-shadow:0 15px 48px #0002,0 0 25px color-mix(in srgb,var(--accent) 9%,transparent);
+}
+.experience-card:hover,.education-card:hover{transform:translateY(-4px)}
+.project-card{position:relative;isolation:isolate}
+.project-card:before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;
+  border-radius:inherit;opacity:0;transition:opacity .32s;
+  background:radial-gradient(circle at 80% 0%,color-mix(in srgb,var(--accent) 13%,transparent),transparent 62%);
+}
+.project-card:hover:before{opacity:1}
+.project-card .project-visual{overflow:hidden}
+.project-card .project-visual:after{
+  content:"";position:absolute;inset:-60%;pointer-events:none;opacity:0;
+  background:linear-gradient(115deg,transparent 40%,#ffffff15 49%,transparent 57%);
+  transform:translateX(-35%);transition:transform .8s ease,opacity .4s;
+}
+.project-card:hover .project-visual:after{transform:translateX(35%);opacity:1}
+.skill-pills span{transition:transform .25s,border-color .25s,color .25s,background .25s}
+.skill-pills span:hover{transform:translateY(-3px);border-color:var(--accent);color:var(--fg);background:color-mix(in srgb,var(--accent) 8%,var(--bg2))}
+.btn,.theme-button,.connect,.filters button,.contact-panel>a,.about-actions a{transition:transform .25s,color .25s,border-color .25s,box-shadow .25s,background .25s}
+.btn.primary{position:relative;overflow:hidden}
+.btn.primary:before{content:"";position:absolute;inset:-100% -50%;background:linear-gradient(110deg,transparent 38%,#ffffff3a 50%,transparent 62%);transform:translateX(-110%) rotate(12deg);transition:transform .8s ease}
+.btn.primary:hover:before{transform:translateX(110%) rotate(12deg)}
+.btn>*{position:relative;z-index:1}
+.nav a{position:relative}
+.nav a:hover,.contact-panel>a:hover,.about-actions a:hover{transform:translateY(-2px)}
+.theme-button:hover{transform:rotate(20deg) scale(1.08);color:var(--accent)}
+.connect:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 0 22px color-mix(in srgb,var(--accent) 18%,transparent)}
+.filters button:hover{border-color:var(--accent);transform:translateY(-2px)}
+/* The effects are optional enhancements, not mandatory to use the page. */
+@media(max-width:800px){
+ .hero-art .orbit-ring-a{width:235px;height:235px}
+ .hero-art .orbit-ring-b{width:260px;height:260px}
+ .hero-art .orbit-particle-a{top:6%;left:19%}
+ .hero-art .orbit-particle-b{right:15%;bottom:8%}
+}
+@media(max-width:400px){
+ .hero-art .orbit-ring-a{width:200px;height:200px}
+ .hero-art .orbit-ring-b{width:225px;height:225px}
+}
+@media(prefers-reduced-motion:reduce){
+ .hero-art .orbit-ring,.hero-art .orbit-particle,.hero h1 em{animation:none!important}
+ .scroll-cue svg,.hero-kicker .status-dot,.connect .status-dot{animation:none!important}
+ .scroll-progress,.btn,.project-card,.experience-card,.education-card,.certificate,.skill-card,.skill-pills span,.theme-button,.connect,.filters button{transition:none!important}
+}
+
+/* Fix mobile intro alignment: the scroll indicator must not become a flex item. */
+.scroll-cue{position:absolute;z-index:4}
+@media(max-width:800px){
+ .hero-layout{width:calc(100% - 36px);max-width:600px;margin-inline:auto;min-width:0}
+ .hero-copy{min-width:0;width:100%}
+ .hero-kicker{flex-wrap:wrap;row-gap:7px}
+ .scroll-cue{left:18px;bottom:15px}
 }
