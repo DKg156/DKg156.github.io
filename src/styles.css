@@ -551,3 +551,11 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .portfolio-guide-launcher,.portfolio-guide-panel{animation:none!important;transition:none!important}
 }
 
+
+/* Minimal floating launcher: icon only, full-size circular touch target. */
+.portfolio-guide-launcher{
+ width:54px;height:54px;min-height:54px;padding:0;border-radius:50%;
+}
+@media(max-width:550px){
+ .portfolio-guide-launcher{width:50px;height:50px;min-height:50px;padding:0}
+}
