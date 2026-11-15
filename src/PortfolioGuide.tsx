@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import type {FormEvent} from 'react';
-import {ArrowUpRight,Bot,MessageCircle,Send,X} from 'lucide-react';
+import {ArrowUpRight,Bot,Send,X} from 'lucide-react';
 import {answerPortfolioQuestion,guideSuggestions} from './portfolioGuide';
 import type {GuideAnswer} from './portfolioGuide';
 
@@ -43,7 +43,9 @@ export default function PortfolioGuide(){
  useEffect(()=>()=>{if(replyTimerRef.current!==null)window.clearTimeout(replyTimerRef.current);},[]);
 
  useEffect(()=>{
-  if(open)inputRef.current?.focus();
+  // Keep the mobile keyboard closed until the visitor taps the input.
+  // Otherwise it hides the opening animation behind the keyboard.
+  if(open&&window.matchMedia('(pointer: fine)').matches)inputRef.current?.focus();
  },[open]);
  useEffect(()=>{
   if(open){const panel=messagesEndRef.current?.parentElement;if(panel)panel.scrollTop=panel.scrollHeight;}
@@ -108,7 +110,7 @@ export default function PortfolioGuide(){
    </form>
   </section>}
   <button type="button" ref={triggerRef} className={'portfolio-guide-launcher '+(open?'is-open':'')} onClick={()=>{if(open)closeChat();else openChat();}} aria-label={open?'Close DK-bot':'Open DK-bot'} aria-expanded={open} aria-controls="portfolio-guide-panel">
-   <MessageCircle size={23} aria-hidden="true"/>
+   <Bot size={25} strokeWidth={1.9} aria-hidden="true"/>
   </button>
  </div>;
  return portalReady?createPortal(widget,document.body):widget;
