@@ -5,14 +5,14 @@ import {answerPortfolioQuestion,guideSuggestions} from './portfolioGuide';
 import type {GuideAnswer} from './portfolioGuide';
 
 type Message={id:number;kind:'visitor'|'guide';text:string;href?:string;label?:string};
-const initialMessage:Message={id:0,kind:'guide',text:"Hi! I'm Dhruv's portfolio chatbot. Curious about his experience, projects, or technical skills? Choose a question below or ask your own."};
+const initialMessage:Message={id:0,kind:'guide',text:"Hi there! 👋 How can I help you today? Ask about Dhruv's experience, projects, skills, or education."};
 const maxHistory=24;
-const greetingSessionKey='dhruv-portfolio-chat-greeting-shown';
+const autoOpenSessionKey='dhruv-portfolio-chat-auto-opened';
 
 export default function PortfolioGuide(){
  const [open,setOpen]=useState(false);
- const [showGreeting,setShowGreeting]=useState(false);
- const greetingSeenRef=useRef(false);
+ const autoOpenHandledRef=useRef(false);
+ const autoOpenedRef=useRef(false);
  const [question,setQuestion]=useState('');
  const [messages,setMessages]=useState<Message[]>([initialMessage]);
  const inputRef=useRef<HTMLInputElement>(null);
@@ -22,38 +22,35 @@ export default function PortfolioGuide(){
  const nextIdRef=useRef(1);
  const wasOpenedRef=useRef(false);
  useEffect(()=>{
-  // A single, nonblocking greeting per browser tab; never auto-open the chat.
-  try{if(sessionStorage.getItem(greetingSessionKey)==='yes'){greetingSeenRef.current=true;return;}}catch{ /* Storage may be disabled. */ }
-  const appear=window.setTimeout(()=>{
-   if(greetingSeenRef.current)return;
-   greetingSeenRef.current=true;
-   try{sessionStorage.setItem(greetingSessionKey,'yes');}catch{ /* Keep working without storage. */ }
-   setShowGreeting(true);
+  // Open the compact chat once after 5s; never repeat after the visitor dismisses it.
+  try{if(sessionStorage.getItem(autoOpenSessionKey)==='yes'){autoOpenHandledRef.current=true;return;}}catch{ /* Keep working with storage disabled. */ }
+  const timer=window.setTimeout(()=>{
+   if(autoOpenHandledRef.current)return;
+   autoOpenHandledRef.current=true;
+   autoOpenedRef.current=true;
+   try{sessionStorage.setItem(autoOpenSessionKey,'yes');}catch{ /* Ignore unavailable storage. */ }
+   setOpen(true);
   },5000);
-  return()=>window.clearTimeout(appear);
+  return()=>window.clearTimeout(timer);
  },[]);
- useEffect(()=>{
-  if(!showGreeting)return;
-  const hide=window.setTimeout(()=>setShowGreeting(false),7000);
-  return()=>window.clearTimeout(hide);
- },[showGreeting]);
  const openChat=()=>{
-  greetingSeenRef.current=true;
-  try{sessionStorage.setItem(greetingSessionKey,'yes');}catch{ /* Storage may be disabled. */ }
-  setShowGreeting(false);
+  autoOpenHandledRef.current=true;
+  autoOpenedRef.current=false;
+  try{sessionStorage.setItem(autoOpenSessionKey,'yes');}catch{ /* Ignore unavailable storage. */ }
   setOpen(true);
  };
 
  useEffect(()=>{
   if(open){
    wasOpenedRef.current=true;
-   inputRef.current?.focus();
+   // Automatic opening must not interrupt typing or steal keyboard focus.
+   if(!autoOpenedRef.current)inputRef.current?.focus();
   }else if(wasOpenedRef.current){
-   triggerRef.current?.focus();
+   if(panelRef.current?.contains(document.activeElement))triggerRef.current?.focus();
   }
  },[open]);
  useEffect(()=>{
-  if(open)messagesEndRef.current?.scrollIntoView({block:'end',behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  if(open){const panel=messagesEndRef.current?.parentElement;if(panel)panel.scrollTop=panel.scrollHeight;}
  },[messages,open]);
  useEffect(()=>{
   if(!open)return;
@@ -84,12 +81,6 @@ export default function PortfolioGuide(){
  const clear=()=>{setMessages([initialMessage]);setQuestion('');inputRef.current?.focus();};
  const followLink=()=>setOpen(false);
  return <div className="portfolio-guide-root">
-  {!open&&showGreeting&&<div className="portfolio-guide-greeting">
-   <button type="button" className="portfolio-guide-greeting-message" onClick={openChat} aria-label="Open chatbot">
-    <span>Hi there! 👋</span><strong>How can I help you today?</strong>
-   </button>
-   <button type="button" className="portfolio-guide-greeting-dismiss" onClick={()=>setShowGreeting(false)} aria-label="Dismiss chatbot greeting"><X size={14}/></button>
-  </div>}
   {open&&<section className="portfolio-guide-panel" id="portfolio-guide-panel" ref={panelRef} role="dialog" aria-label="Chatbot" aria-modal="false">
    <header className="portfolio-guide-head">
     <div className="portfolio-guide-mark"><Bot size={20}/></div>
@@ -115,8 +106,7 @@ export default function PortfolioGuide(){
    <p className="portfolio-guide-disclaimer">Answers are based on information published on this portfolio. Chat history stays in this browser tab.</p>
   </section>}
   <button type="button" ref={triggerRef} className={'portfolio-guide-launcher '+(open?'is-open':'')} onClick={()=>{if(open)setOpen(false);else openChat();}} aria-label={open?'Close chatbot':'Open chatbot'} aria-expanded={open} aria-controls="portfolio-guide-panel">
-   {open?<X size={22}/>:<MessageCircle size={23}/>}
-   {!open&&<span>Chatbot</span>}
+   <MessageCircle size={23}/><span>Chatbot</span>
   </button>
  </div>;
 }
