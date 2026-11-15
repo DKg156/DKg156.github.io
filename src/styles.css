@@ -654,3 +654,68 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 
 /* Retain the cleaner orbital animation from PR #19: satellite paths stay invisible. */
 .hero-art .stellar-orbit{border-width:0;box-shadow:none}
+
+/* Extremely faint chip-and-trace artwork in the empty top padding of sections.
+   Intentionally local to five transitions, never a full-page overlay/grid. */
+.section .chip-divider{
+ position:absolute;
+ top:16px;
+ left:50%;
+ transform:translateX(-50%);
+ width:min(440px,calc(100% - 52px));
+ height:76px;
+ color:var(--accent);
+ opacity:.105;
+ z-index:0;
+ pointer-events:none;
+ user-select:none;
+}
+.section .chip-divider svg{display:block;width:100%;height:100%}
+:root[data-theme=light] .section .chip-divider{opacity:.085}
+@media(max-width:800px){
+ .section .chip-divider{top:8px;width:min(330px,calc(100% - 40px));height:62px;opacity:.09}
+ :root[data-theme=light] .section .chip-divider{opacity:.075}
+}
+@media(max-width:400px){
+ .section .chip-divider{width:calc(100% - 40px);height:54px;top:6px}
+}
+
+/* Scroll-responsive section scenes. Each section reacts independently as it
+   crosses the viewport; no global grid or replacement section backgrounds. */
+.section>.wrap{position:relative;z-index:1}
+.section .scroll-scene-glow{
+ position:absolute;top:12%;left:max(-120px,calc((100% - 1250px)/2 - 160px));
+ width:min(540px,75vw);height:420px;z-index:0;pointer-events:none;
+ background:radial-gradient(ellipse at center,color-mix(in srgb,var(--accent) 15%,transparent),transparent 70%);
+ opacity:var(--scene-presence,0);
+ transform:translate3d(0,var(--scene-drift,0px),0);
+}
+.section:nth-of-type(odd) .scroll-scene-glow{
+ left:auto;right:max(-120px,calc((100% - 1250px)/2 - 160px));
+ background:radial-gradient(ellipse at center,color-mix(in srgb,var(--accent2) 13%,transparent),transparent 70%);
+}
+/* A slender, progressive circuit-trace indicator alongside each active section. */
+.section .scroll-scene-rail{
+ position:absolute;top:120px;left:max(14px,calc((100% - 1160px)/2 - 30px));
+ height:108px;width:2px;z-index:1;pointer-events:none;
+ border-radius:99px;background:color-mix(in srgb,var(--accent) 15%,transparent);
+ opacity:var(--scene-presence,0);
+}
+.section .scroll-scene-rail::after{
+ content:"";position:absolute;inset:0;border-radius:inherit;
+ transform:scaleY(var(--scene-progress,0));transform-origin:center top;
+ background:linear-gradient(var(--accent2),var(--accent));
+ box-shadow:0 0 12px color-mix(in srgb,var(--accent) 35%,transparent);
+}
+/* The new chip motifs float by no more than 12px as their section passes. */
+.section .chip-divider{transform:translate(-50%,var(--scene-drift,0px))}
+:root[data-theme=light] .section .scroll-scene-glow{opacity:calc(var(--scene-presence,0) * .65)}
+@media(max-width:800px){
+ .section .scroll-scene-rail{display:none}
+ .section .scroll-scene-glow{width:300px;height:270px;top:15%;left:-100px}
+ .section:nth-of-type(odd) .scroll-scene-glow{left:auto;right:-100px}
+}
+@media(prefers-reduced-motion:reduce){
+ .section .scroll-scene-glow,.section .scroll-scene-rail{display:none}
+ .section .chip-divider{transform:translateX(-50%)}
+}
