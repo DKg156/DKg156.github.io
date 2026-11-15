@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="traces" x1="325" y1="700" x2="1450" y2="130" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#59DCC5"/><stop offset=".48" stop-color="#A292FF"/><stop offset="1" stop-color="#6E9DFF"/>
+    </linearGradient>
+    <linearGradient id="rings" x1="1060" y1="230" x2="1480" y2="680" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A99BFF"/><stop offset="1" stop-color="#59DCC5"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="translate(1235 435) rotate(90) scale(440)">
+      <stop stop-color="#9D8BFF" stop-opacity=".12"/><stop offset="1" stop-color="#9D8BFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="1235" cy="435" r="440" fill="url(#halo)"/>
+  <!-- Mathematical orbital construction, intentionally asymmetrical. -->
+  <g stroke="url(#rings)" stroke-width="1.15" opacity=".42">
+    <circle cx="1220" cy="434" r="170"/>
+    <circle cx="1220" cy="434" r="247" stroke-dasharray="3 10"/>
+    <circle cx="1220" cy="434" r="318" opacity=".55"/>
+    <ellipse cx="1220" cy="434" rx="360" ry="136" transform="rotate(-31 1220 434)"/>
+    <ellipse cx="1220" cy="434" rx="330" ry="198" transform="rotate(31 1220 434)" stroke-dasharray="7 10"/>
+    <path d="M880 434h680 M1220 92v688" stroke-dasharray="2 15" opacity=".46"/>
+    <path d="M1190 434h60 M1220 404v60" opacity=".8"/>
+  </g>
+  <!-- Graph and circuit paths outside the reading column. -->
+  <g stroke="url(#traces)" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" opacity=".53">
+    <path d="M660 125h126l45 45h145l58 58h100"/>
+    <path d="M722 255h136l47-47h91l42-42h135"/>
+    <path d="M1555 154h-96l-54 54h-132l-56 56"/>
+    <path d="M1595 659h-141l-62-62h-147l-46-46"/>
+    <path d="M774 740h144l67-67h114l58-58"/>
+    <path d="M675 581h130l55-55h100l66-66"/>
+    <path d="M1456 840v-126l-75-75v-82"/>
+    <path d="M1090 38v120l52 52"/>
+    <path d="M940 876V760l53-53"/>
+    <path d="M1564 368h-121l-47 47h-82"/>
+  </g>
+  <!-- A few deliberate graph edges and dashed data paths. -->
+  <g stroke="url(#traces)" stroke-width="1" opacity=".29">
+    <path d="M838 168l117 89 134-74 132 81 116-59"/>
+    <path d="M815 558l141-93 140 72 129-102 157 87"/>
+    <path d="M954 257l2 208-96 61 M1090 183l6 354 129-102" stroke-dasharray="4 9"/>
+    <path d="M1225 435l112-230 45 317" stroke-dasharray="3 11"/>
+  </g>
+  <!-- Node markers. -->
+  <g fill="#A99BFF" stroke="#A99BFF">
+    <circle cx="838" cy="168" r="3"/><circle cx="954" cy="257" r="4"/>
+    <circle cx="1090" cy="183" r="3"/><circle cx="1221" cy="264" r="3"/>
+    <circle cx="1337" cy="205" r="4"/><circle cx="815" cy="558" r="3"/>
+    <circle cx="1096" cy="537" r="4"/><circle cx="1225" cy="435" r="4"/>
+    <circle cx="1382" cy="522" r="3"/><circle cx="1443" cy="415" r="3"/>
+  </g>
+  <g stroke="#74E1D1" stroke-width="1.2" opacity=".7">
+    <circle cx="954" cy="257" r="10"/><circle cx="1225" cy="435" r="12"/>
+    <circle cx="1382" cy="522" r="9"/><circle cx="1096" cy="537" r="8"/>
+    <path d="M656 125h-12m6-6v12 M776 740h-12m6-6v12 M1555 154h-12m6-6v12"/>
+  </g>
+  <g fill="#74E1D1" opacity=".76">
+    <circle cx="860" cy="526" r="2.8"/><circle cx="1173" cy="166" r="2.8"/>
+    <circle cx="995" cy="673" r="2.8"/><circle cx="1199" cy="551" r="2.8"/>
+    <circle cx="1381" cy="639" r="2.8"/>
+  </g>
+</svg>
