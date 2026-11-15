@@ -23,7 +23,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero-layout{grid-template-columns:minmax(0,1fr) minmax(250px,330px);gap:52px;padding:88px 0 92px}
 .hero-art{height:370px;min-width:0}
 /* Keep a 250px circular frame without enlarging the face to fill its diameter. */
-.portrait-ring{width:232px;height:232px;max-width:100%;padding:9px;border-radius:50%;box-shadow:0 0 65px #8270c126;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.portrait-ring{width:244px;height:244px;max-width:100%;padding:15px;border-color:transparent;border-radius:50%;box-shadow:0 0 65px #8270c126;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .portrait-ring img{
   display:block;flex:none;width:78%;height:110%;
   object-fit:contain;object-position:center;
@@ -35,8 +35,8 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .float-card.top{right:-8px;top:28px}
 .float-card.bottom{left:-12px;bottom:25px}
 .education-grid{grid-template-columns:minmax(0,610px)}
-@media(max-width:800px){.hero-layout{grid-template-columns:1fr;gap:18px;padding:65px 0 90px}.hero-art{order:0;height:265px}.portrait-ring{width:172px;height:172px}.hero-copy{order:1}.float-card.top{right:18px;top:9px}.float-card.bottom{left:12px;bottom:7px}.education-grid{grid-template-columns:1fr}}
-@media(max-width:400px){.hero-art{height:235px}.portrait-ring{width:157px;height:157px}.float-card{padding:8px;gap:7px}.float-card strong{font-size:10px}.float-card small{font-size:9px}.float-card.top{right:0}.float-card.bottom{left:0}}
+@media(max-width:800px){.hero-layout{grid-template-columns:1fr;gap:18px;padding:65px 0 90px}.hero-art{order:0;height:265px}.portrait-ring{width:184px;height:184px}.hero-copy{order:1}.float-card.top{right:18px;top:9px}.float-card.bottom{left:12px;bottom:7px}.education-grid{grid-template-columns:1fr}}
+@media(max-width:400px){.hero-art{height:235px}.portrait-ring{width:169px;height:169px}.float-card{padding:8px;gap:7px}.float-card strong{font-size:10px}.float-card small{font-size:9px}.float-card.top{right:0}.float-card.bottom{left:0}}
 
 /* Gentle reveal animations and an atmospheric, lightweight CSS background. */
 .hero{isolation:isolate}
@@ -110,7 +110,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero-glow-one{opacity:.31}
 .hero-glow-two{opacity:.23}
 .hero-layout{z-index:3}
-.portrait-ring{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 55px color-mix(in srgb,var(--accent) 22%,transparent)}
+.portrait-ring{box-shadow:0 0 55px color-mix(in srgb,var(--accent) 22%,transparent)}
 :root[data-theme=light] .hero-glow{mix-blend-mode:multiply;opacity:.13}
 :root[data-theme=light] .hero:after{opacity:.28}
 @media(max-width:800px){
@@ -154,7 +154,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 @keyframes headline-aurora{from{background-position:0% 50%}to{background-position:100% 50%}}
 @keyframes status-signal{0%,100%{box-shadow:0 0 0 0 #74e2b455,0 0 12px #74e2b4}48%{box-shadow:0 0 0 6px #74e2b400,0 0 20px #74e2b49e}}
 @keyframes scroll-invite{0%,100%{transform:translateY(-2px)}50%{transform:translateY(6px)}}
-@keyframes portrait-halo{0%{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 35px color-mix(in srgb,var(--accent) 18%,transparent)}100%{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent2) 70%,transparent),0 0 80px color-mix(in srgb,var(--accent) 34%,transparent)}}
+@keyframes portrait-halo{0%{box-shadow:0 0 35px color-mix(in srgb,var(--accent) 18%,transparent)}100%{box-shadow:0 0 80px color-mix(in srgb,var(--accent) 34%,transparent)}}
 @keyframes orbit-spin{to{transform:rotate(360deg)}}
 @keyframes orbit-spin-reverse{to{transform:rotate(-360deg)}}
 @keyframes orbit-point-a{from{transform:translate3d(-7px,8px,0) scale(.8);opacity:.3}to{transform:translate3d(9px,-10px,0) scale(1.2);opacity:1}}
@@ -254,17 +254,17 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .portrait-ring::before{
   content:"";
   position:absolute;
-  inset:13px;
+  inset:19px;
   z-index:4;
   border:4px solid #9b8cff;
   border-radius:50%;
   pointer-events:none;
 }
 @media(max-width:800px){
-  .portrait-ring::before{inset:10px}
+  .portrait-ring::before{inset:16px}
 }
 @media(max-width:400px){
-  .portrait-ring::before{inset:9px}
+  .portrait-ring::before{inset:15px}
 }
 
 /* Thicker circular portrait border to mask the white outer edge.
@@ -278,7 +278,6 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
   border:13px solid color-mix(in srgb,var(--accent) 46%,var(--surface));
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),
-    0 0 0 2px color-mix(in srgb,var(--accent) 82%,transparent),
     0 0 22px color-mix(in srgb,var(--accent) 30%,transparent);
   pointer-events:none;
 }
@@ -783,4 +782,44 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 }
 @media(prefers-reduced-motion:reduce){
  .section .neon-side-light{display:none;transition:none}
+}
+
+
+/* Barely visible ambient motion behind the hero introduction, without moving content. */
+.hero-copy{position:relative;isolation:isolate}
+.hero-copy-atmosphere{
+ position:absolute;inset:-36px -12px -36px -42px;z-index:-1;
+ overflow:hidden;pointer-events:none;
+}
+.hero-copy-ambient{
+ position:absolute;width:370px;height:310px;left:-95px;top:9%;
+ border-radius:50%;background:radial-gradient(ellipse at center,color-mix(in srgb,var(--accent) 9%,transparent),transparent 70%);
+ filter:blur(38px);opacity:.6;
+}
+.hero-copy-mote{
+ position:absolute;width:3px;height:3px;border-radius:50%;
+ background:var(--accent);opacity:.1;
+}
+.hero-copy-mote.mote-one{top:17%;left:9%}
+.hero-copy-mote.mote-two{top:39%;left:77%;width:2px;height:2px}
+.hero-copy-mote.mote-three{top:72%;left:21%;width:2px;height:2px}
+.hero-copy-mote.mote-four{top:85%;left:89%}
+@media(prefers-reduced-motion:no-preference){
+ .hero-copy-ambient{animation:hero-copy-breathe 24s ease-in-out infinite alternate}
+ .hero-copy-mote.mote-one{animation:hero-copy-drift 27s ease-in-out infinite alternate}
+ .hero-copy-mote.mote-two{animation:hero-copy-drift 32s ease-in-out -8s infinite alternate-reverse}
+ .hero-copy-mote.mote-three{animation:hero-copy-drift 23s ease-in-out -4s infinite alternate}
+ .hero-copy-mote.mote-four{animation:hero-copy-drift 29s ease-in-out -12s infinite alternate-reverse}
+}
+@keyframes hero-copy-breathe{
+ from{transform:translate3d(-14px,8px,0) scale(.95);opacity:.42}
+ to{transform:translate3d(20px,-12px,0) scale(1.06);opacity:.7}
+}
+@keyframes hero-copy-drift{
+ from{transform:translate3d(-5px,10px,0);opacity:.06}
+ to{transform:translate3d(12px,-16px,0);opacity:.12}
+}
+@media(max-width:800px){
+ .hero-copy-atmosphere{inset:-18px 0 -18px -18px}
+ .hero-copy-ambient{width:260px;height:230px;left:-80px}
 }

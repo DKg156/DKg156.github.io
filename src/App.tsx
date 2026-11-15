@@ -199,7 +199,7 @@ export default function App(){
  </div></header>
  <main id="main">
  <section id="home" className="hero"><div className="hero-mesh" aria-hidden="true"/><div className="hero-glow hero-glow-one" aria-hidden="true"/><div className="hero-glow hero-glow-two" aria-hidden="true"/><div className="wrap hero-layout"><div className="hero-copy" data-reveal="up">
-
+ <div className="hero-copy-atmosphere" aria-hidden="true"><span className="hero-copy-ambient"/><span className="hero-copy-mote mote-one"/><span className="hero-copy-mote mote-two"/><span className="hero-copy-mote mote-three"/><span className="hero-copy-mote mote-four"/></div>
  <h1>Dhruv Khurana<br/><em>AI Engineer</em></h1>
  <p className="hero-description">I'm an AI Engineer working at the intersection of generative AI, large language models, and production software systems. I build practical applications that make complex technology useful.</p>
  <div className="hero-actions"><a className="btn primary" href="#projects">Explore my work <ArrowUpRight size={18}/></a><a className="btn ghost" href="#about">More about me <ArrowDown size={18}/></a></div>
