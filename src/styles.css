@@ -55,3 +55,43 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  [data-reveal]{opacity:1!important;transform:none!important}
 }
 @media(max-width:800px){.hero-glow{width:280px;height:280px;filter:blur(55px)}}
+
+/* STEM / CS ambient background: locally hosted orbital-network artwork. */
+.hero{isolation:isolate}
+.hero:after{
+  content:"";position:absolute;z-index:0;inset:0;
+  pointer-events:none;
+  background-image:url('/assets/graphics/computational-field.svg');
+  background-repeat:no-repeat;
+  background-size:min(1150px,94vw) auto;
+  background-position:calc(50% + 260px) 48%;
+  opacity:.36;
+  mask-image:linear-gradient(to right,transparent 17%,#000 60%);
+  animation:field-appear 1.6s ease-out both,field-breathe 24s ease-in-out 1.6s infinite alternate;
+}
+.hero-mesh{opacity:.13;background-size:54px 54px}
+.hero-glow-one{opacity:.12}
+.hero-glow-two{opacity:.08}
+.hero-layout,.scroll-cue{position:relative;z-index:2}
+.hero-copy{position:relative;z-index:3}
+.hero-art{position:relative;z-index:3}
+.section-alt:after{
+  content:"";position:absolute;pointer-events:none;z-index:-1;
+  inset:0;
+  background-image:radial-gradient(circle,color-mix(in srgb,var(--accent) 25%,transparent) 1px,transparent 1.6px);
+  background-size:36px 36px;
+  opacity:.18;
+  mask-image:linear-gradient(to right,transparent 7%,black 88%);
+}
+:root[data-theme=light] .hero:after{opacity:.24;filter:contrast(1.3)}
+:root[data-theme=light] .hero-mesh{opacity:.12}
+@keyframes field-appear{from{opacity:0;transform:translateY(18px)}to{opacity:.36;transform:translateY(0)}}
+@keyframes field-breathe{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(0,-12px,0) scale(1.025)}}
+@media(max-width:800px){
+  .hero:after{background-size:900px auto;background-position:center 2%;opacity:.24;mask-image:linear-gradient(to bottom,black,transparent 65%)}
+  .section-alt:after{opacity:.11}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero:after{animation:none!important}
+  .hero-mesh{animation:none!important}
+}
