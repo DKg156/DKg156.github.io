@@ -553,7 +553,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 @media(prefers-reduced-motion:no-preference){
  .portfolio-guide-panel{
   transform-origin:100% 100%;
-  animation:portfolio-guide-pop .42s cubic-bezier(.19,.86,.25,1) both;
+  animation:portfolio-guide-pop .75s cubic-bezier(.19,.86,.25,1) both;
  }
  @keyframes portfolio-guide-pop{
   0%{opacity:0;transform:translate3d(0,28px,0) scale(.78)}
