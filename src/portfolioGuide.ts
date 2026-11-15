@@ -57,7 +57,7 @@ const intents:Intent[]=[
  {id:'quick_summary',phrases:['summarize his portfolio','summary of portfolio','quick summary','quick introduction','give me an overview','give me a summary','summarize dhruv','in a nutshell'],keywords:[],answer:()=>({text:`Dhruv is an AI Engineer at ${job.company} with prior Java/Spring Boot backend experience at ${backend.company} and an M.E. in Software Systems from BITS Pilani. His work includes RAG, agent workflows, fine-tuning and inference; his projects cover deepfake detection, plant imagery and drug recommendation.`,href:'#about',label:'About Me'})},
  {id:'simple_explanation',phrases:['explain his work simply','explain his experience simply','in simple terms','explain in simple words','what does his work mean','non technical explanation','non-technical explanation'],keywords:[],answer:()=>({text:'Dhruv builds software that helps AI systems find useful information, use language models and support real applications. He also has a background in building reliable backend services.',href:'#about',label:'About Me'})},
  {id:'bot_identity',phrases:['what is dk-bot','are you an ai','are you a real ai','are you a human','are you a chatbot','are you an llm','how do you work'],keywords:[],answer:()=>({text:'I’m DK-bot, a portfolio assistant that answers a set of predefined questions using information about Dhruv and links to relevant sections. I do not generate open-ended answers or access private records.',href:'#about',label:'Explore portfolio'})},
- {id:'navigation',phrases:['take me to projects','go to projects','where are the projects','show projects section','take me to skills','go to skills','take me to education','go to education','show experience section','take me to experience','where is the contact section'],keywords:[],answer:()=>({text:'You can jump to the relevant section using the website navigation, or ask me directly about a project, technology, degree or professional experience.',href:'#projects',label:'Explore projects'})},
+ {id:'navigation',phrases:['website navigation','navigate portfolio','find sections','where are the sections'],keywords:[],answer:()=>({text:'Use the navigation bar to jump to About, Experience, Projects, Skills, Education or Contact. You can also ask me for a specific section.',href:'#about',label:'Explore portfolio'})},
  {id:'motivation',phrases:['what motivates him','why does he work in ai','why is he interested in ai','what drives him','passion for ai'],keywords:[],answer:()=>({text:'His portfolio emphasizes connecting modern AI research with dependable software engineering and building practical applications. It does not include a detailed personal account of his motivations.',href:'#about',label:'About Me'})},
  {id:'project_challenges',phrases:['project challenges','biggest challenge','challenges did he solve','technical challenges','hardest problem he solved'],keywords:[],answer:()=>({text:'The portfolio describes project goals and technologies, but not a detailed account of obstacles or debugging decisions. You can read the project descriptions and contact Dhruv to discuss implementation challenges.',href:'#projects',label:'Projects'})},
  {id:'thanks',phrases:['thank you','thanks','thank you dk-bot','bye','goodbye'],keywords:[],answer:()=>({text:"You're welcome! You can explore the portfolio sections or reach out through the Contact section.",href:'#contact',label:'Contact Me'})}
@@ -101,6 +101,19 @@ export function answerPortfolioQuestion(input:string,previousTopic?:string):Guid
  // Avoid making claims about facts not present in the public portfolio.
  if(['salary','compensation','ctc','phone','mobile number','age','relationship','notice period','availability','personal life','home address'].some(phrase=>includesPhrase(query,phrase))){
   return {text:"That information isn't published on this portfolio. For professional inquiries, please use the contact links.",href:'#contact',label:'Contact Me'};
+ }
+ // Direct navigation maps destinations to their actual anchors.
+ const destinations=[
+  {name:'Projects',href:'#projects',phrases:['take me to projects','go to projects','where are the projects','show projects section']},
+  {name:'Technical Skills',href:'#skills',phrases:['take me to skills','go to skills','show skills section']},
+  {name:'Education',href:'#education',phrases:['take me to education','go to education','show education section']},
+  {name:'Experience',href:'#experience',phrases:['take me to experience','show experience section','go to experience']},
+  {name:'Contact Me',href:'#contact',phrases:['where is the contact section','go to contact','take me to contact']}
+ ];
+ for(const destination of destinations){
+  if(destination.phrases.some(phrase=>includesPhrase(query,phrase))){
+   return {text:`Here is the ${destination.name} section.`,href:destination.href,label:destination.name};
+  }
  }
  const contextual=projectFollowup(query,previousTopic);
  if(contextual)return contextual;
