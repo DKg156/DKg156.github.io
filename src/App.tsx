@@ -173,7 +173,7 @@ export default function App(){
    </div>
  </div>}
  <header className="header"><div className="wrap header-content">
- <a href="#home" className="brand" onClick={()=>setMenu(false)} aria-label="Dhruv Khurana, home"><span className="monogram">D<span>.</span></span></a>
+ <a href="#home" className="brand" onClick={()=>setMenu(false)} aria-label="Dhruv Khurana, home"><span className="monogram">DK<span>.</span></span></a>
  <nav className={'nav '+(menu?'open':'')} aria-label="Primary navigation">{nav.map(item=><a key={item} href={'#'+item.toLowerCase()} onClick={()=>setMenu(false)} className={active===item.toLowerCase()?'current':''} aria-current={active===item.toLowerCase()?'location':undefined}>{item}</a>)}</nav>
  <div className="header-tools"><button type="button" className="quick-open" ref={searchButtonRef} onClick={()=>setSearchOpen(true)} aria-label="Open quick navigation, Control or Command plus K" title="Quick navigation (Ctrl/⌘ K)"><Search size={17}/><span>Search</span><kbd>⌘ K</kbd></button><button className="theme-button" type="button" aria-label={theme==='dark'?'Activate light mode':'Activate dark mode'} onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={18}/>:<Moon size={18}/>}</button><a href="https://www.linkedin.com/in/dhruv156" target="_blank" rel="noopener noreferrer" className="connect"><span className="status-dot"/>Let's connect <ArrowUpRight size={14}/></a><button className="menu-button" aria-label={menu?'Close navigation':'Open navigation'} aria-expanded={menu} onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}</button></div>
  </div></header>
