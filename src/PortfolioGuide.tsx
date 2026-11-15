@@ -106,7 +106,7 @@ export default function PortfolioGuide(){
    <p className="portfolio-guide-disclaimer">Answers are based on information published on this portfolio. Chat history stays in this browser tab.</p>
   </section>}
   <button type="button" ref={triggerRef} className={'portfolio-guide-launcher '+(open?'is-open':'')} onClick={()=>{if(open)setOpen(false);else openChat();}} aria-label={open?'Close chatbot':'Open chatbot'} aria-expanded={open} aria-controls="portfolio-guide-panel">
-   <MessageCircle size={23}/><span>Chatbot</span>
+   <MessageCircle size={23} aria-hidden="true"/>
   </button>
  </div>;
 }
