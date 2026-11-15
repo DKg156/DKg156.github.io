@@ -23,7 +23,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero-layout{grid-template-columns:minmax(0,1fr) 230px;gap:60px;padding:88px 0 92px}
 .hero-art{height:310px;min-width:0}
 .portrait-ring{width:190px;height:268px;max-width:100%;padding:5px;border-radius:18px;box-shadow:0 14px 35px #0002}
-.portrait-ring img{border-radius:13px;object-fit:cover;object-position:center top;width:100%;height:100%}
+.portrait-ring{background-image:url('/assets/images/portrait.webp');background-origin:content-box;background-clip:content-box;background-size:calc(100% - 10px) calc(100% - 10px);background-position:center;background-repeat:no-repeat;cursor:default;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .hero-art .orb{display:none}
 .education-grid{grid-template-columns:minmax(0,610px)}
 @media(max-width:800px){.hero-layout{grid-template-columns:1fr;gap:18px;padding:65px 0 90px}.hero-art{order:0;height:225px}.portrait-ring{width:148px;height:208px}.hero-copy{order:1}.education-grid{grid-template-columns:1fr}}
