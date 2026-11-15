@@ -21,14 +21,14 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 /* Retain the original circular portrait and floating cards, at a smaller scale. */
 .hero{min-height:650px}
 .hero-layout{grid-template-columns:minmax(0,1fr) minmax(250px,330px);gap:52px;padding:88px 0 92px}
-.hero-art{height:355px;min-width:0}
-.portrait-ring{width:224px;height:224px;max-width:100%;padding:9px;border-radius:50%;box-shadow:0 0 65px #8270c126}
-.portrait-ring img{border-radius:50%;width:100%;height:100%;object-fit:cover;object-position:center 24%;display:block}
+.hero-art{height:390px;min-width:0}
+.portrait-ring{width:264px;height:264px;max-width:100%;padding:9px;border-radius:50%;box-shadow:0 0 65px #8270c126}
+.portrait-ring img{border-radius:50%;width:100%;height:100%;object-fit:contain;object-position:center center;background:#fff;display:block}
 .float-card.top{right:-8px;top:28px}
 .float-card.bottom{left:-12px;bottom:25px}
 .education-grid{grid-template-columns:minmax(0,610px)}
-@media(max-width:800px){.hero-layout{grid-template-columns:1fr;gap:18px;padding:65px 0 90px}.hero-art{order:0;height:255px}.portrait-ring{width:176px;height:176px}.hero-copy{order:1}.float-card.top{right:18px;top:9px}.float-card.bottom{left:12px;bottom:7px}.education-grid{grid-template-columns:1fr}}
-@media(max-width:400px){.hero-art{height:230px}.portrait-ring{width:156px;height:156px}.float-card{padding:8px;gap:7px}.float-card strong{font-size:10px}.float-card small{font-size:9px}.float-card.top{right:0}.float-card.bottom{left:0}}
+@media(max-width:800px){.hero-layout{grid-template-columns:1fr;gap:18px;padding:65px 0 90px}.hero-art{order:0;height:275px}.portrait-ring{width:200px;height:200px}.hero-copy{order:1}.float-card.top{right:18px;top:9px}.float-card.bottom{left:12px;bottom:7px}.education-grid{grid-template-columns:1fr}}
+@media(max-width:400px){.hero-art{height:245px}.portrait-ring{width:176px;height:176px}.float-card{padding:8px;gap:7px}.float-card strong{font-size:10px}.float-card small{font-size:9px}.float-card.top{right:0}.float-card.bottom{left:0}}
 
 /* Gentle reveal animations and an atmospheric, lightweight CSS background. */
 .hero{isolation:isolate}
@@ -55,3 +55,61 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  [data-reveal]{opacity:1!important;transform:none!important}
 }
 @media(max-width:800px){.hero-glow{width:280px;height:280px;filter:blur(55px)}}
+
+/* STEM / CS ambient background: locally hosted orbital-network artwork. */
+.hero{isolation:isolate}
+.hero:after{
+  content:"";position:absolute;z-index:0;inset:0;
+  pointer-events:none;
+  background-image:url('/assets/graphics/computational-field.svg');
+  background-repeat:no-repeat;
+  background-size:min(1150px,94vw) auto;
+  background-position:calc(50% + 260px) 48%;
+  opacity:.36;
+  mask-image:linear-gradient(to right,transparent 17%,#000 60%);
+  animation:field-appear 1.6s ease-out both,field-breathe 24s ease-in-out 1.6s infinite alternate;
+}
+.hero-mesh{opacity:.13;background-size:54px 54px}
+.hero-glow-one{opacity:.12}
+.hero-glow-two{opacity:.08}
+.hero-layout,.scroll-cue{position:relative;z-index:2}
+.hero-copy{position:relative;z-index:3}
+.hero-art{position:relative;z-index:3}
+.section-alt:after{
+  content:"";position:absolute;pointer-events:none;z-index:-1;
+  inset:0;
+  background-image:radial-gradient(circle,color-mix(in srgb,var(--accent) 25%,transparent) 1px,transparent 1.6px);
+  background-size:36px 36px;
+  opacity:.18;
+  mask-image:linear-gradient(to right,transparent 7%,black 88%);
+}
+:root[data-theme=light] .hero:after{opacity:.24;filter:contrast(1.3)}
+:root[data-theme=light] .hero-mesh{opacity:.12}
+@keyframes field-appear{from{opacity:0;transform:translateY(18px)}to{opacity:.36;transform:translateY(0)}}
+@keyframes field-breathe{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(0,-12px,0) scale(1.025)}}
+@media(max-width:800px){
+  .hero:after{background-size:900px auto;background-position:center 2%;opacity:.24;mask-image:linear-gradient(to bottom,black,transparent 65%)}
+  .section-alt:after{opacity:.11}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero:after{animation:none!important}
+  .hero-mesh{animation:none!important}
+}
+
+/* Neon light layer retained above the STEM graph illustration. */
+.hero:after{z-index:0;opacity:.44}
+.hero-glow{z-index:1;mix-blend-mode:screen;filter:blur(68px)}
+.hero-glow-one{opacity:.31}
+.hero-glow-two{opacity:.23}
+.hero-layout,.scroll-cue{z-index:3}
+.portrait-ring{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 55px color-mix(in srgb,var(--accent) 22%,transparent)}
+:root[data-theme=light] .hero-glow{mix-blend-mode:multiply;opacity:.13}
+:root[data-theme=light] .hero:after{opacity:.28}
+@media(max-width:800px){
+  .hero:after{opacity:.24}
+  .hero-glow-one{opacity:.23}
+  .hero-glow-two{opacity:.16}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-glow,.hero:after{animation:none!important}
+}
