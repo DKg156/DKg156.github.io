@@ -549,9 +549,17 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .portfolio-guide-panel{bottom:61px;width:calc(100vw - 26px);height:min(430px,calc(100dvh - 92px));max-height:calc(100dvh - 92px)}
  .portfolio-guide-conversation{min-height:110px}
 }
+/* Chat-window opening: expand gently outward from the bottom-right launcher. */
 @media(prefers-reduced-motion:no-preference){
- .portfolio-guide-panel{animation:portfolio-guide-appear .26s cubic-bezier(.2,.75,.25,1) both}
- @keyframes portfolio-guide-appear{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+ .portfolio-guide-panel{
+  transform-origin:100% 100%;
+  animation:portfolio-guide-pop .42s cubic-bezier(.19,.86,.25,1) both;
+ }
+ @keyframes portfolio-guide-pop{
+  0%{opacity:0;transform:translate3d(0,28px,0) scale(.78)}
+  68%{opacity:1;transform:translate3d(0,-3px,0) scale(1.018)}
+  100%{opacity:1;transform:translate3d(0,0,0) scale(1)}
+ }
 }
 @media(prefers-reduced-motion:reduce){
  .portfolio-guide-launcher,.portfolio-guide-panel{animation:none!important;transition:none!important}
