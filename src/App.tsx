@@ -1,9 +1,15 @@
 import {useEffect,useRef,useState} from 'react';
-import {ArrowDown,ArrowUp,ArrowUpRight,BrainCircuit,BriefcaseBusiness,Check,ChevronRight,Code2,ExternalLink,Github,GraduationCap,Layers3,Linkedin,Mail,MapPin,Menu,Moon,Sun,X} from 'lucide-react';
+import {ArrowDown,ArrowUp,ArrowUpRight,BrainCircuit,BriefcaseBusiness,Check,ChevronRight,Code2,ExternalLink,Github,GraduationCap,Layers3,Linkedin,Mail,MapPin,Menu,Moon,Search,Sun,X} from 'lucide-react';
 import {education,experience,projects,skillGroups} from './data';
 
 const nav=['Home','About','Experience','Projects','Skills','Education','Contact'];
 const email='dhruvkhuranag156@gmail.com';
+const quickActions=[
+ ...nav.map((label)=>({label:'Go to '+label,detail:'Navigate to section',keywords:label.toLowerCase()+' section',href:'#'+label.toLowerCase(),external:false})),
+ {label:'View GitHub',detail:'Projects and code',keywords:'repositories github code',href:'https://github.com/DKg156',external:true},
+ {label:'Open LinkedIn',detail:'Professional profile',keywords:'linkedin connect social',href:'https://www.linkedin.com/in/dhruv156',external:true},
+ {label:'Send an email',detail:'Get in touch',keywords:'email contact message',href:'mailto:'+email,external:true}
+];
 function Heading({index,kicker,title,desc}:{index:string;kicker:string;title:string;desc?:string}) {
  return <div className="section-heading" data-reveal="up"><div className="eyebrow"><span className="index">{index}</span>{kicker}</div><h2>{title}</h2>{desc&&<p>{desc}</p>}</div>;
 }
@@ -13,6 +19,13 @@ export default function App(){
  const [active,setActive]=useState('home');
  const [filter,setFilter]=useState('All');
  const [copied,setCopied]=useState(false);
+ const [searchOpen,setSearchOpen]=useState(false);
+ const [searchQuery,setSearchQuery]=useState('');
+ const [searchIndex,setSearchIndex]=useState(0);
+ const searchInputRef=useRef<HTMLInputElement>(null);
+ const searchButtonRef=useRef<HTMLButtonElement>(null);
+ const searchDialogRef=useRef<HTMLDivElement>(null);
+ const filteredActions=quickActions.filter(action=>(action.label+' '+action.detail+' '+action.keywords).toLowerCase().includes(searchQuery.trim().toLowerCase()));
  const progressRef=useRef<HTMLDivElement>(null);
  useEffect(()=>{
    // Reveal individual cards with a stagger. Re-observe when the project filter changes.
@@ -64,18 +77,66 @@ export default function App(){
    const observer=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting)setActive(entry.target.id);},{rootMargin:'-20% 0px -62% 0px',threshold:0});
    sections.forEach(s=>observer.observe(s));return()=>observer.disconnect();
  },[]);
+ useEffect(()=>{
+   const onShortcut=(event:KeyboardEvent)=>{
+     if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){
+       event.preventDefault();
+       setSearchOpen(open=>!open);
+     }
+     if(event.key==='Escape')setSearchOpen(false);
+   };
+   window.addEventListener('keydown',onShortcut);
+   return()=>window.removeEventListener('keydown',onShortcut);
+ },[]);
+ useEffect(()=>{
+   if(!searchOpen)return;
+   setSearchQuery('');
+   setSearchIndex(0);
+   const previous=document.body.style.overflow;
+   document.body.style.overflow='hidden';
+   searchInputRef.current?.focus();
+   return()=>{document.body.style.overflow=previous;searchButtonRef.current?.focus();};
+ },[searchOpen]);
+ function useAction(href:string,external:boolean){
+   setSearchOpen(false);
+   setMenu(false);
+   if(external){if(href.startsWith('mailto:'))window.location.href=href;else window.open(href,'_blank','noopener,noreferrer');}
+   else {window.location.hash=href;}
+ }
+ function onSearchKeyDown(event:React.KeyboardEvent<HTMLDivElement>){
+   if(event.key==='ArrowDown'){event.preventDefault();setSearchIndex(i=>(i+1)%Math.max(filteredActions.length,1));}
+   if(event.key==='ArrowUp'){event.preventDefault();setSearchIndex(i=>(i-1+Math.max(filteredActions.length,1))%Math.max(filteredActions.length,1));}
+   if(event.key==='Enter'&&filteredActions.length){event.preventDefault();const action=filteredActions[searchIndex]||filteredActions[0];useAction(action.href,action.external);}
+   if(event.key==='Tab'){
+     const focusables=Array.from(searchDialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]),input:not([disabled])')||[]);
+     if(!focusables.length)return;
+     const first=focusables[0],last=focusables[focusables.length-1];
+     if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+     else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+   }
+ }
  async function copyEmail(){try{await navigator.clipboard.writeText(email);setCopied(true);window.setTimeout(()=>setCopied(false),2200);}catch{window.location.href='mailto:'+email;}}
  return <div className="site">
  <div className="scroll-progress" ref={progressRef} aria-hidden="true"/>
  <a className="skip" href="#main">Skip to content</a>
+ {searchOpen&&<div className="quick-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSearchOpen(false);}}>
+   <div className="quick-dialog" ref={searchDialogRef} role="dialog" aria-modal="true" aria-label="Quick navigation" onKeyDown={onSearchKeyDown}>
+     <div className="quick-search"><Search size={20}/><input ref={searchInputRef} type="search" aria-label="Search sections and links" placeholder="Jump to a section or link..." value={searchQuery} onChange={event=>{setSearchQuery(event.target.value);setSearchIndex(0);}}/><button type="button" className="quick-close" onClick={()=>setSearchOpen(false)} aria-label="Close quick navigation"><X size={18}/></button></div>
+     <div className="quick-results" role="listbox" aria-label="Navigation results">
+       {filteredActions.length?filteredActions.map((action,index)=><button type="button" key={action.href} role="option" aria-selected={index===searchIndex} className={'quick-result '+(index===searchIndex?'selected':'')} onMouseEnter={()=>setSearchIndex(index)} onClick={()=>useAction(action.href,action.external)}><span className="quick-result-icon">{action.external?<ArrowUpRight size={17}/>:<ChevronRight size={17}/>}</span><span className="quick-result-info"><strong>{action.label}</strong><small>{action.detail}</small></span><span className="quick-result-arrow">{action.external?'↗':'↵'}</span></button>)
+       :<p className="quick-empty">No matching destinations.</p>}
+     </div>
+     <div className="quick-footer"><span><kbd>↑</kbd><kbd>↓</kbd> Navigate</span><span><kbd>↵</kbd> Select</span><span><kbd>Esc</kbd> Close</span></div>
+   </div>
+ </div>}
  <header className="header"><div className="wrap header-content">
  <a href="#home" className="brand" onClick={()=>setMenu(false)} aria-label="Dhruv Khurana, home"><span className="monogram">D<span>.</span></span><span className="brand-text">DHRUV KHURANA</span></a>
  <nav className={'nav '+(menu?'open':'')} aria-label="Primary navigation">{nav.map(item=><a key={item} href={'#'+item.toLowerCase()} onClick={()=>setMenu(false)} className={active===item.toLowerCase()?'current':''} aria-current={active===item.toLowerCase()?'location':undefined}>{item}</a>)}</nav>
- <div className="header-tools"><button className="theme-button" type="button" aria-label={theme==='dark'?'Activate light mode':'Activate dark mode'} onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={18}/>:<Moon size={18}/>}</button><a href="https://www.linkedin.com/in/dhruv156" target="_blank" rel="noopener noreferrer" className="connect"><span className="status-dot"/>Let's connect <ArrowUpRight size={14}/></a><button className="menu-button" aria-label={menu?'Close navigation':'Open navigation'} aria-expanded={menu} onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}</button></div>
+ <div className="header-tools"><button type="button" className="quick-open" ref={searchButtonRef} onClick={()=>setSearchOpen(true)} aria-label="Open quick navigation, Control or Command plus K" title="Quick navigation (Ctrl/⌘ K)"><Search size={17}/><span>Search</span><kbd>⌘ K</kbd></button><button className="theme-button" type="button" aria-label={theme==='dark'?'Activate light mode':'Activate dark mode'} onClick={()=>setTheme(theme==='dark'?'light':'dark')}>{theme==='dark'?<Sun size={18}/>:<Moon size={18}/>}</button><a href="https://www.linkedin.com/in/dhruv156" target="_blank" rel="noopener noreferrer" className="connect"><span className="status-dot"/>Let's connect <ArrowUpRight size={14}/></a><button className="menu-button" aria-label={menu?'Close navigation':'Open navigation'} aria-expanded={menu} onClick={()=>setMenu(!menu)}>{menu?<X/>:<Menu/>}</button></div>
  </div></header>
  <main id="main">
  <section id="home" className="hero"><div className="hero-mesh" aria-hidden="true"/><div className="hero-glow hero-glow-one" aria-hidden="true"/><div className="hero-glow hero-glow-two" aria-hidden="true"/><div className="wrap hero-layout"><div className="hero-copy" data-reveal="up">
- <div className="eyebrow hero-kicker"><span className="status-dot"/> PORTFOLIO / 2026 <span className="separator"/> AI ENGINEER</div>
+
  <h1>Dhruv Khurana<br/><em>AI Engineer</em></h1>
  <p className="hero-description">I'm <strong>Dhruv Khurana</strong>, an AI Engineer working at the intersection of generative AI, large language models, and production software systems. I build practical applications that make complex technology useful.</p>
  <div className="hero-actions"><a className="btn primary" href="#projects">Explore my work <ArrowUpRight size={18}/></a><a className="btn ghost" href="#about">More about me <ArrowDown size={18}/></a></div>
