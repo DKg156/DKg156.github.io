@@ -755,24 +755,22 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 }
 
 
-/* A faint version of the hero grid, only when the title or intro is hovered.
-   No drifting particles, glow animation, or animated text. */
-.hero-copy{position:relative;isolation:isolate}
-.hero-copy-hover-grid{
- position:absolute;inset:-20px -18px -14px -24px;z-index:0;
- border-radius:20px;pointer-events:none;opacity:0;
+/* Full-height left hero grid on title/intro hover, not bounded by text box.
+   The horizontal fade blends into the existing orbital scene on the right. */
+.hero-left-hover-grid{
+ position:absolute;inset:0 auto 0 0;width:72%;z-index:2;
+ pointer-events:none;opacity:0;
  background-image:
   linear-gradient(to right,color-mix(in srgb,var(--accent) 21%,transparent) 1px,transparent 1px),
   linear-gradient(to bottom,color-mix(in srgb,var(--accent) 21%,transparent) 1px,transparent 1px);
  background-size:70px 70px;
- mask-image:radial-gradient(ellipse 75% 75% at 42% 42%,#000 34%,transparent 100%);
+ mask-image:linear-gradient(to right,#000 0%,#000 70%,transparent 100%);
  transition:opacity .5s ease;
 }
-.hero-copy>:not(.hero-copy-hover-grid){position:relative;z-index:1}
 @media(hover:hover) and (pointer:fine){
- .hero-copy:has(>h1:hover,>.hero-description:hover) .hero-copy-hover-grid{opacity:.32}
- :root[data-theme=light] .hero-copy:has(>h1:hover,>.hero-description:hover) .hero-copy-hover-grid{opacity:.24}
+ .hero:has(.hero-copy > h1:hover,.hero-copy > .hero-description:hover) .hero-left-hover-grid{opacity:.32}
+ :root[data-theme=light] .hero:has(.hero-copy > h1:hover,.hero-copy > .hero-description:hover) .hero-left-hover-grid{opacity:.24}
 }
 @media(prefers-reduced-motion:reduce){
- .hero-copy-hover-grid{transition:none}
+ .hero-left-hover-grid{transition:none}
 }
