@@ -729,16 +729,16 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .section .chip-divider{transform:translateX(-50%)}
 }
 
-/* Invisible neon-green side illumination: quick switch-on, steady in view,
+/* Invisible light-purple side illumination: quick switch-on, steady in view,
    and fade-out on exit. Section clipping prevents mobile horizontal overflow. */
 .section .neon-side-light{
  --neon-side:-16%;
  position:absolute;inset:0;z-index:0;pointer-events:none;
  background:
   radial-gradient(ellipse 47% 65% at var(--neon-side) 48%,
-   rgba(95,255,164,.23) 0%,rgba(38,227,130,.105) 50%,transparent 100%),
+   rgba(202,181,255,.23) 0%,rgba(167,142,255,.105) 50%,transparent 100%),
   radial-gradient(ellipse 82% 115% at var(--neon-side) 51%,
-   rgba(26,235,123,.125) 0%,rgba(26,235,123,.045) 52%,transparent 100%);
+   rgba(153,126,255,.125) 0%,rgba(153,126,255,.045) 52%,transparent 100%);
  opacity:0;
  transition:opacity .8s ease-out;
 }
@@ -749,9 +749,9 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .section .neon-side-light{
   background:
    radial-gradient(ellipse 85% 55% at var(--neon-side) 42%,
-    rgba(95,255,164,.24) 0%,rgba(38,227,130,.10) 52%,transparent 100%),
+    rgba(202,181,255,.24) 0%,rgba(167,142,255,.10) 52%,transparent 100%),
    radial-gradient(ellipse 115% 95% at var(--neon-side) 48%,
-    rgba(26,235,123,.12) 0%,transparent 100%);
+    rgba(153,126,255,.12) 0%,transparent 100%);
  }
 }
 @media(prefers-reduced-motion:reduce){
