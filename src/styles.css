@@ -29,3 +29,29 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .education-grid{grid-template-columns:minmax(0,610px)}
 @media(max-width:800px){.hero-layout{grid-template-columns:1fr;gap:18px;padding:65px 0 90px}.hero-art{order:0;height:255px}.portrait-ring{width:176px;height:176px}.hero-copy{order:1}.float-card.top{right:18px;top:9px}.float-card.bottom{left:12px;bottom:7px}.education-grid{grid-template-columns:1fr}}
 @media(max-width:400px){.hero-art{height:230px}.portrait-ring{width:156px;height:156px}.float-card{padding:8px;gap:7px}.float-card strong{font-size:10px}.float-card small{font-size:9px}.float-card.top{right:0}.float-card.bottom{left:0}}
+
+/* Gentle reveal animations and an atmospheric, lightweight CSS background. */
+.hero{isolation:isolate}
+.hero-mesh{animation:grid-drift 26s linear infinite;opacity:.24}
+.hero-glow{position:absolute;z-index:0;pointer-events:none;width:420px;height:420px;border-radius:50%;filter:blur(74px);opacity:.2;animation:glow-float 12s ease-in-out infinite alternate}
+.hero-glow-one{top:12%;right:4%;background:var(--accent)}
+.hero-glow-two{bottom:-25%;left:21%;width:320px;height:320px;background:var(--accent2);animation-delay:-5s;opacity:.12}
+.hero-layout{z-index:1}
+.section{position:relative;isolation:isolate}
+.section-alt:before{content:'';position:absolute;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse 70% 55% at 100% 20%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 72%)}
+.project-card .project-symbol{transition:transform .5s cubic-bezier(.2,.8,.2,1),filter .5s}
+.project-card:hover .project-symbol{transform:translateY(-9px) scale(1.09);filter:drop-shadow(0 4px 19px currentColor)}
+.skill-card{transition:transform .28s,border-color .28s}
+.skill-card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 62%,var(--border))}
+@keyframes grid-drift{0%{background-position:0 0}100%{background-position:70px 70px}}
+@keyframes glow-float{0%{transform:translate3d(-12px,12px,0) scale(.92)}100%{transform:translate3d(18px,-24px,0) scale(1.12)}}
+@media(prefers-reduced-motion:no-preference){
+ [data-reveal].reveal-ready{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.75,.25,1)}
+ [data-reveal="right"].reveal-ready{transform:translateX(26px)}
+ [data-reveal].reveal-ready.is-visible{opacity:1;transform:translate(0,0)}
+}
+@media(prefers-reduced-motion:reduce){
+ .hero-mesh,.hero-glow,.float-card{animation:none!important}
+ [data-reveal]{opacity:1!important;transform:none!important}
+}
+@media(max-width:800px){.hero-glow{width:280px;height:280px;filter:blur(55px)}}
