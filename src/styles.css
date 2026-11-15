@@ -493,7 +493,12 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 }
 
 /* On-device, deterministic portfolio guide. No API or chatbot service. */
-.portfolio-guide-root{position:fixed;bottom:24px;right:24px;z-index:90}
+.portfolio-guide-root{
+ position:fixed;
+ bottom:calc(24px + env(safe-area-inset-bottom,0px));
+ right:calc(24px + env(safe-area-inset-right,0px));
+ z-index:150;
+}
 .portfolio-guide-launcher{
  display:flex;align-items:center;justify-content:center;gap:10px;
  min-height:54px;padding:0 18px;border:1px solid color-mix(in srgb,var(--accent) 65%,var(--border));
@@ -536,7 +541,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .portfolio-guide-sr-only{position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden;white-space:nowrap}
 .portfolio-guide-root button:focus-visible,.portfolio-guide-root a:focus-visible,.portfolio-guide-root input:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
 @media(max-width:550px){
- .portfolio-guide-root{right:13px;bottom:14px}
+ .portfolio-guide-root{right:calc(13px + env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px))}
  .portfolio-guide-launcher{min-height:50px;padding:0 13px;font-size:12px}
  .portfolio-guide-launcher.is-open{min-height:50px}
  .portfolio-guide-panel{bottom:61px;width:calc(100vw - 26px);height:min(430px,calc(100dvh - 92px));max-height:calc(100dvh - 92px)}
