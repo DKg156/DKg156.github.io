@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
+import {createPortal} from 'react-dom';
 import type {FormEvent} from 'react';
 import {ArrowUpRight,Bot,MessageCircle,Send,X} from 'lucide-react';
 import {answerPortfolioQuestion,guideSuggestions} from './portfolioGuide';
@@ -10,6 +11,10 @@ const maxHistory=24;
 
 export default function PortfolioGuide(){
  const [open,setOpen]=useState(false);
+ // Keep server-rendered markup identical during hydration, then move the
+ // floating widget to <body> so mobile layout layers cannot obscure it.
+ const [portalReady,setPortalReady]=useState(false);
+ useEffect(()=>{setPortalReady(true);},[]);
  const [question,setQuestion]=useState('');
  const [messages,setMessages]=useState<Message[]>([initialMessage]);
  const [thinking,setThinking]=useState(false);
@@ -78,7 +83,7 @@ export default function PortfolioGuide(){
  };
  const submit=(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();ask(question);};
  const followLink=()=>closeChat();
- return <div className="portfolio-guide-root">
+ const widget=<div className="portfolio-guide-root">
   {open&&<section className="portfolio-guide-panel" id="portfolio-guide-panel" ref={panelRef} role="dialog" aria-label="Chatbot" aria-modal="false">
    <header className="portfolio-guide-head">
     <div className="portfolio-guide-mark"><Bot size={20}/></div>
@@ -106,4 +111,5 @@ export default function PortfolioGuide(){
    <MessageCircle size={23} aria-hidden="true"/>
   </button>
  </div>;
+ return portalReady?createPortal(widget,document.body):widget;
 }
