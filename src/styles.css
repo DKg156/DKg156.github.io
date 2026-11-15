@@ -95,3 +95,21 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
   .hero:after{animation:none!important}
   .hero-mesh{animation:none!important}
 }
+
+/* Neon light layer retained above the STEM graph illustration. */
+.hero:after{z-index:0;opacity:.44}
+.hero-glow{z-index:1;mix-blend-mode:screen;filter:blur(68px)}
+.hero-glow-one{opacity:.31}
+.hero-glow-two{opacity:.23}
+.hero-layout,.scroll-cue{z-index:3}
+.portrait-ring{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 55px color-mix(in srgb,var(--accent) 22%,transparent)}
+:root[data-theme=light] .hero-glow{mix-blend-mode:multiply;opacity:.13}
+:root[data-theme=light] .hero:after{opacity:.28}
+@media(max-width:800px){
+  .hero:after{opacity:.24}
+  .hero-glow-one{opacity:.23}
+  .hero-glow-two{opacity:.16}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-glow,.hero:after{animation:none!important}
+}
