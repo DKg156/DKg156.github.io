@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {ArrowUpRight,Network} from 'lucide-react';
+import {ArrowUpRight,ChevronDown,Network} from 'lucide-react';
 import {skillGroups} from './data';
 
 type SkillNode={id:string;group:number;x:number;y:number;description:string};
@@ -31,8 +31,8 @@ export default function SkillsConstellation(){
  const [selected,setSelected]=useState('RAG');
  const chosen=nodes.find(node=>node.id===selected)||nodes[0];
  const group=skillGroups[chosen.group];
- return <div className="constellation" data-reveal="up">
-  <div className="constellation-header"><div><div className="constellation-eyebrow"><Network size={16}/> EXPLORE THE STACK</div><h3>Skills constellation</h3><p>Select a node to explore how the technologies in my toolkit fit together.</p></div><div className="constellation-legend" aria-hidden="true"><span className="constellation-legend-dot"/> Interactive skill map</div></div>
+ return <details className="constellation" data-reveal="up">
+  <summary className="constellation-header"><div><div className="constellation-eyebrow"><Network size={16}/> EXPLORE THE STACK</div><h3>Skills constellation</h3><p>Open the interactive map to explore how my technologies fit together.</p></div><span className="constellation-toggle" aria-hidden="true"><span>Explore map</span><ChevronDown size={19}/></span></summary>
   <div className="constellation-scroller" tabIndex={0} aria-label="Scrollable skills constellation">
    <div className="constellation-stage">
     <svg className="constellation-lines" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
@@ -46,5 +46,5 @@ export default function SkillsConstellation(){
   </div>
   <div className="constellation-inspector" aria-live="polite"><div><span className="constellation-inspector-label">SELECTED TECHNOLOGY</span><h4>{chosen.id}</h4><p>{chosen.description}</p></div><div className="constellation-inspector-category"><span>{group.title}</span><ArrowUpRight size={17}/></div></div>
   <p className="constellation-footnote">A curated view of the stack. The complete skills list remains below. On smaller screens, swipe the map horizontally to explore.</p>
- </div>;
+ </details>;
 }
