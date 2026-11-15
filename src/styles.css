@@ -550,3 +550,42 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 @media(prefers-reduced-motion:reduce){
  .portfolio-guide-launcher,.portfolio-guide-panel{animation:none!important;transition:none!important}
 }
+
+/* One-time, non-blocking chatbot invitation above the existing launcher. */
+.portfolio-guide-greeting{
+ position:absolute;bottom:70px;right:0;width:max-content;max-width:min(300px,calc(100vw - 26px));
+ display:flex;align-items:flex-start;gap:5px;
+ padding:7px 6px 7px 10px;border-radius:15px;
+ border:1px solid color-mix(in srgb,var(--accent) 50%,var(--border));
+ background:var(--surface);box-shadow:0 14px 42px #0005,0 0 25px color-mix(in srgb,var(--accent) 14%,transparent);
+}
+.portfolio-guide-greeting::after{
+ content:"";position:absolute;right:26px;bottom:-7px;width:12px;height:12px;
+ background:var(--surface);border-right:1px solid color-mix(in srgb,var(--accent) 50%,var(--border));
+ border-bottom:1px solid color-mix(in srgb,var(--accent) 50%,var(--border));
+ transform:rotate(45deg);
+}
+.portfolio-guide-greeting-message{
+ display:grid;gap:3px;text-align:left;padding:5px 4px;border:0;
+ color:var(--fg);background:transparent;cursor:pointer;font:inherit;line-height:1.35;
+}
+.portfolio-guide-greeting-message span{color:var(--accent);font-size:12px;font-weight:700}
+.portfolio-guide-greeting-message strong{font-size:13px;font-weight:600}
+.portfolio-guide-greeting-dismiss{
+ display:grid;place-items:center;flex:none;width:27px;height:27px;padding:5px;
+ border:0;border-radius:7px;color:var(--muted);background:transparent;cursor:pointer;
+}
+.portfolio-guide-greeting-dismiss:hover{background:var(--surface2);color:var(--fg)}
+@media(prefers-reduced-motion:no-preference){
+ .portfolio-guide-greeting{animation:portfolio-guide-greet .4s cubic-bezier(.2,.8,.2,1) both}
+ @keyframes portfolio-guide-greet{
+  from{opacity:0;transform:translateY(9px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .portfolio-guide-greeting{animation:none!important}
+}
+@media(max-width:550px){
+ .portfolio-guide-greeting{bottom:63px;max-width:calc(100vw - 26px)}
+}
