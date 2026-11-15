@@ -23,7 +23,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero-layout{grid-template-columns:minmax(0,1fr) minmax(250px,330px);gap:52px;padding:88px 0 92px}
 .hero-art{height:370px;min-width:0}
 /* Keep a 250px circular frame without enlarging the face to fill its diameter. */
-.portrait-ring{width:232px;height:232px;max-width:100%;padding:9px;border-radius:50%;box-shadow:0 0 65px #8270c126;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.portrait-ring{width:244px;height:244px;max-width:100%;padding:15px;border-radius:50%;box-shadow:0 0 65px #8270c126;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .portrait-ring img{
   display:block;flex:none;width:78%;height:110%;
   object-fit:contain;object-position:center;
@@ -35,8 +35,8 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .float-card.top{right:-8px;top:28px}
 .float-card.bottom{left:-12px;bottom:25px}
 .education-grid{grid-template-columns:minmax(0,610px)}
-@media(max-width:800px){.hero-layout{grid-template-columns:1fr;gap:18px;padding:65px 0 90px}.hero-art{order:0;height:265px}.portrait-ring{width:172px;height:172px}.hero-copy{order:1}.float-card.top{right:18px;top:9px}.float-card.bottom{left:12px;bottom:7px}.education-grid{grid-template-columns:1fr}}
-@media(max-width:400px){.hero-art{height:235px}.portrait-ring{width:157px;height:157px}.float-card{padding:8px;gap:7px}.float-card strong{font-size:10px}.float-card small{font-size:9px}.float-card.top{right:0}.float-card.bottom{left:0}}
+@media(max-width:800px){.hero-layout{grid-template-columns:1fr;gap:18px;padding:65px 0 90px}.hero-art{order:0;height:265px}.portrait-ring{width:184px;height:184px}.hero-copy{order:1}.float-card.top{right:18px;top:9px}.float-card.bottom{left:12px;bottom:7px}.education-grid{grid-template-columns:1fr}}
+@media(max-width:400px){.hero-art{height:235px}.portrait-ring{width:169px;height:169px}.float-card{padding:8px;gap:7px}.float-card strong{font-size:10px}.float-card small{font-size:9px}.float-card.top{right:0}.float-card.bottom{left:0}}
 
 /* Gentle reveal animations and an atmospheric, lightweight CSS background. */
 .hero{isolation:isolate}
@@ -254,17 +254,17 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .portrait-ring::before{
   content:"";
   position:absolute;
-  inset:13px;
+  inset:19px;
   z-index:4;
   border:4px solid #9b8cff;
   border-radius:50%;
   pointer-events:none;
 }
 @media(max-width:800px){
-  .portrait-ring::before{inset:10px}
+  .portrait-ring::before{inset:16px}
 }
 @media(max-width:400px){
-  .portrait-ring::before{inset:9px}
+  .portrait-ring::before{inset:15px}
 }
 
 /* Thicker circular portrait border to mask the white outer edge.
