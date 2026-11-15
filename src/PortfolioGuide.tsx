@@ -16,10 +16,12 @@ export default function PortfolioGuide(){
  const [portalReady,setPortalReady]=useState(false);
  useEffect(()=>{setPortalReady(true);},[]);
  const [question,setQuestion]=useState('');
- const [messages,setMessages]=useState<Message[]>([initialMessage]);
+ const [messages,setMessages]=useState<Message[]>([]);
+ const [greetingPending,setGreetingPending]=useState(false);
  const [thinking,setThinking]=useState(false);
  const thinkingRef=useRef(false);
  const replyTimerRef=useRef<ReturnType<typeof setTimeout>|null>(null);
+ const greetingTimerRef=useRef<ReturnType<typeof setTimeout>|null>(null);
  const inputRef=useRef<HTMLInputElement>(null);
  const triggerRef=useRef<HTMLButtonElement>(null);
  const messagesEndRef=useRef<HTMLDivElement>(null);
@@ -27,23 +29,41 @@ export default function PortfolioGuide(){
  const nextIdRef=useRef(1);
  // Only retain the last explicitly named project for short follow-up questions.
  const topicRef=useRef<string|undefined>(undefined);
- const openChat=()=>setOpen(true);
+ const openChat=()=>{
+  setMessages([]);
+  setGreetingPending(true);
+  setOpen(true);
+  // Let the panel animate in before the first bot message appears.
+  greetingTimerRef.current=window.setTimeout(()=>{
+   greetingTimerRef.current=null;
+   setMessages([initialMessage]);
+   setGreetingPending(false);
+  },1000);
+ };
  const closeChat=()=>{
   // Cancel any delayed response and reset all conversation state before closing.
   if(replyTimerRef.current!==null){
    window.clearTimeout(replyTimerRef.current);
    replyTimerRef.current=null;
   }
+  if(greetingTimerRef.current!==null){
+   window.clearTimeout(greetingTimerRef.current);
+   greetingTimerRef.current=null;
+  }
   thinkingRef.current=false;
   setThinking(false);
-  setMessages([initialMessage]);
+  setGreetingPending(false);
+  setMessages([]);
   setQuestion('');
   nextIdRef.current=1;
   topicRef.current=undefined;
   if(panelRef.current?.contains(document.activeElement))triggerRef.current?.focus();
   setOpen(false);
  };
- useEffect(()=>()=>{if(replyTimerRef.current!==null)window.clearTimeout(replyTimerRef.current);},[]);
+ useEffect(()=>()=>{
+  if(replyTimerRef.current!==null)window.clearTimeout(replyTimerRef.current);
+  if(greetingTimerRef.current!==null)window.clearTimeout(greetingTimerRef.current);
+ },[]);
 
  useEffect(()=>{
   // Keep the mobile keyboard closed until the visitor taps the input.
@@ -70,7 +90,7 @@ export default function PortfolioGuide(){
  },[open,messages]);
  const ask=(raw:string)=>{
   const value=raw.trim().slice(0,300);
-  if(!value||thinkingRef.current)return;
+  if(!value||thinkingRef.current||greetingPending)return;
   const response:GuideAnswer=answerPortfolioQuestion(value,topicRef.current);
   topicRef.current=response.topic;
   const visitor:Message={id:nextIdRef.current++,kind:'visitor',text:value};
@@ -101,16 +121,16 @@ export default function PortfolioGuide(){
      <p>{message.text}</p>
      {message.href&&<a href={message.href} onClick={followLink} target={message.href.startsWith('http')?'_blank':undefined} rel={message.href.startsWith('http')?'noopener noreferrer':undefined}>{message.label||'Explore section'}<ArrowUpRight size={13}/></a>}
     </div>)}
-    {thinking&&<div className="portfolio-guide-message guide portfolio-guide-thinking" role="status" aria-label="DK-bot is typing"><span className="portfolio-guide-sr-only">DK-bot is typing</span><span aria-hidden="true" className="portfolio-guide-dots"><i/><i/><i/></span></div>}
+    {(thinking||greetingPending)&&<div className="portfolio-guide-message guide portfolio-guide-thinking" role="status" aria-label="DK-bot is typing"><span className="portfolio-guide-sr-only">DK-bot is typing</span><span aria-hidden="true" className="portfolio-guide-dots"><i/><i/><i/></span></div>}
     <div ref={messagesEndRef}/>
    </div>
    <div className="portfolio-guide-suggestions" aria-label="Suggested questions">
-    {guideSuggestions.map(suggestion=><button key={suggestion} type="button" onClick={()=>ask(suggestion)} disabled={thinking}>{suggestion}</button>)}
+    {guideSuggestions.map(suggestion=><button key={suggestion} type="button" onClick={()=>ask(suggestion)} disabled={thinking||greetingPending}>{suggestion}</button>)}
    </div>
    <form className="portfolio-guide-form" onSubmit={submit}>
     <label htmlFor="portfolio-guide-question" className="portfolio-guide-sr-only">Question about Dhruv's portfolio</label>
     <input ref={inputRef} id="portfolio-guide-question" type="text" value={question} onChange={event=>setQuestion(event.target.value)} placeholder="Ask about experience, projects..." maxLength={300} autoComplete="off"/>
-    <button type="submit" aria-label="Send question" disabled={!question.trim()||thinking}><Send size={18}/></button>
+    <button type="submit" aria-label="Send question" disabled={!question.trim()||thinking||greetingPending}><Send size={18}/></button>
    </form>
   </section>}
   <button type="button" ref={triggerRef} className={'portfolio-guide-launcher '+(open?'is-open':'')} onClick={()=>{if(open)closeChat();else openChat();}} aria-label={open?'Close DK-bot':'Open DK-bot'} aria-expanded={open} aria-controls="portfolio-guide-panel">
