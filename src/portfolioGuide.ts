@@ -57,7 +57,7 @@ export function answerPortfolioQuestion(input:string):GuideAnswer{
  const query=normalize(input).slice(0,500);
  if(!query)return {text:'Type a question or choose one of the suggestions below.'};
  // Avoid making claims about facts not present in the public portfolio.
- if(['salary','compensation','ctc','phone number','mobile number','age','relationship','notice period','job availability','joining availability','personal life','home address'].some(phrase=>includesPhrase(query,phrase))){
+ if(['salary','compensation','ctc','phone','mobile number','age','relationship','notice period','availability','personal life','home address'].some(phrase=>includesPhrase(query,phrase))){
   return {text:"That information isn't published on this portfolio. For professional inquiries, please use the contact links.",href:'#contact',label:'Contact Me'};
  }
  let best:Intent|undefined;
