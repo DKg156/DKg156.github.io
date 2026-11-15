@@ -84,18 +84,18 @@ export default function PortfolioGuide(){
  const submit=(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();ask(question);};
  const followLink=()=>closeChat();
  const widget=<div className="portfolio-guide-root">
-  {open&&<section className="portfolio-guide-panel" id="portfolio-guide-panel" ref={panelRef} role="dialog" aria-label="Chatbot" aria-modal="false">
+  {open&&<section className="portfolio-guide-panel" id="portfolio-guide-panel" ref={panelRef} role="dialog" aria-label="DK-bot" aria-modal="false">
    <header className="portfolio-guide-head">
     <div className="portfolio-guide-mark"><Bot size={20}/></div>
-    <div className="portfolio-guide-heading"><strong>Chatbot</strong><small>Ask about Dhruv</small></div>
-    <button type="button" className="portfolio-guide-icon-button" onClick={closeChat} aria-label="Close chatbot"><X size={19}/></button>
+    <div className="portfolio-guide-heading"><strong>DK-bot</strong><small>Ask about Dhruv</small></div>
+    <button type="button" className="portfolio-guide-icon-button" onClick={closeChat} aria-label="Close DK-bot"><X size={19}/></button>
    </header>
    <div className="portfolio-guide-conversation" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions text">
     {messages.map(message=><div key={message.id} className={'portfolio-guide-message '+(message.kind==='visitor'?'visitor':'guide')}>
      <p>{message.text}</p>
      {message.href&&<a href={message.href} onClick={followLink} target={message.href.startsWith('http')?'_blank':undefined} rel={message.href.startsWith('http')?'noopener noreferrer':undefined}>{message.label||'Explore section'}<ArrowUpRight size={13}/></a>}
     </div>)}
-    {thinking&&<div className="portfolio-guide-message guide portfolio-guide-thinking" role="status" aria-label="Chatbot is typing"><span className="portfolio-guide-sr-only">Chatbot is typing</span><span aria-hidden="true" className="portfolio-guide-dots"><i/><i/><i/></span></div>}
+    {thinking&&<div className="portfolio-guide-message guide portfolio-guide-thinking" role="status" aria-label="DK-bot is typing"><span className="portfolio-guide-sr-only">DK-bot is typing</span><span aria-hidden="true" className="portfolio-guide-dots"><i/><i/><i/></span></div>}
     <div ref={messagesEndRef}/>
    </div>
    <div className="portfolio-guide-suggestions" aria-label="Suggested questions">
@@ -107,7 +107,7 @@ export default function PortfolioGuide(){
     <button type="submit" aria-label="Send question" disabled={!question.trim()||thinking}><Send size={18}/></button>
    </form>
   </section>}
-  <button type="button" ref={triggerRef} className={'portfolio-guide-launcher '+(open?'is-open':'')} onClick={()=>{if(open)closeChat();else openChat();}} aria-label={open?'Close chatbot':'Open chatbot'} aria-expanded={open} aria-controls="portfolio-guide-panel">
+  <button type="button" ref={triggerRef} className={'portfolio-guide-launcher '+(open?'is-open':'')} onClick={()=>{if(open)closeChat();else openChat();}} aria-label={open?'Close DK-bot':'Open DK-bot'} aria-expanded={open} aria-controls="portfolio-guide-panel">
    <MessageCircle size={23} aria-hidden="true"/>
   </button>
  </div>;
