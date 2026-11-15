@@ -257,7 +257,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
   position:absolute;
   inset:19px;
   z-index:4;
-  border:4px solid #9b8cff;
+  border:25px solid #9b8cff;
   border-radius:50%;
   pointer-events:none;
 }
