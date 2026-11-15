@@ -25,6 +25,8 @@ export default function PortfolioGuide(){
  const messagesEndRef=useRef<HTMLDivElement>(null);
  const panelRef=useRef<HTMLElement>(null);
  const nextIdRef=useRef(1);
+ // Only retain the last explicitly named project for short follow-up questions.
+ const topicRef=useRef<string|undefined>(undefined);
  const openChat=()=>setOpen(true);
  const closeChat=()=>{
   // Cancel any delayed response and reset all conversation state before closing.
@@ -37,6 +39,7 @@ export default function PortfolioGuide(){
   setMessages([initialMessage]);
   setQuestion('');
   nextIdRef.current=1;
+  topicRef.current=undefined;
   if(panelRef.current?.contains(document.activeElement))triggerRef.current?.focus();
   setOpen(false);
  };
@@ -68,7 +71,8 @@ export default function PortfolioGuide(){
  const ask=(raw:string)=>{
   const value=raw.trim().slice(0,300);
   if(!value||thinkingRef.current)return;
-  const response:GuideAnswer=answerPortfolioQuestion(value);
+  const response:GuideAnswer=answerPortfolioQuestion(value,topicRef.current);
+  topicRef.current=response.topic;
   const visitor:Message={id:nextIdRef.current++,kind:'visitor',text:value};
   const answer:Message={id:nextIdRef.current++,kind:'guide',...response};
   thinkingRef.current=true;
