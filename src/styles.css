@@ -539,7 +539,9 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .portfolio-guide-form button{height:34px;width:36px;flex-shrink:0;border:0;border-radius:8px;display:grid;place-items:center;background:var(--accent);color:#0e1426;cursor:pointer}
 .portfolio-guide-form button:disabled{opacity:.4;cursor:not-allowed}
 .portfolio-guide-sr-only{position:absolute;clip:rect(0,0,0,0);width:1px;height:1px;overflow:hidden;white-space:nowrap}
-.portfolio-guide-root button:focus-visible,.portfolio-guide-root a:focus-visible,.portfolio-guide-root input:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+.portfolio-guide-root button:focus-visible,.portfolio-guide-root a:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+/* The chat form already has a purple :focus-within border; avoid a second green outline around its input. */
+.portfolio-guide-root .portfolio-guide-form input:focus-visible{outline:none}
 @media(max-width:550px){
  .portfolio-guide-root{right:calc(13px + env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px))}
  .portfolio-guide-launcher{min-height:50px;padding:0 13px;font-size:12px}
