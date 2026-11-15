@@ -157,7 +157,7 @@ export default function App(){
      cleanups.push(()=>{element.classList.remove('spotlight-surface');reset();});
    });
    return()=>cleanups.forEach(cleanup=>cleanup());
- },[]);
+ },[filter]);
  async function copyEmail(){try{await navigator.clipboard.writeText(email);setCopied(true);window.setTimeout(()=>setCopied(false),2200);}catch{window.location.href='mailto:'+email;}}
  return <div className="site">
  <div className="scroll-progress" ref={progressRef} aria-hidden="true"/>
