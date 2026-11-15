@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {ArrowDown,ArrowRight,ArrowUp,ArrowUpRight,BrainCircuit,BriefcaseBusiness,Check,ChevronRight,Code2,ExternalLink,Github,GraduationCap,Layers3,Linkedin,Mail,MapPin,Menu,Moon,Sun,X} from 'lucide-react';
+import {ArrowDown,ArrowUp,ArrowUpRight,BrainCircuit,BriefcaseBusiness,Check,ChevronRight,Code2,ExternalLink,Github,GraduationCap,Layers3,Linkedin,Mail,MapPin,Menu,Moon,Sun,X} from 'lucide-react';
 import {education,experience,projects,skillGroups} from './data';
 
 const nav=['Home','About','Experience','Projects','Skills','Education','Contact'];
