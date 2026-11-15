@@ -249,3 +249,25 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .hero-kicker{flex-wrap:wrap;row-gap:7px}
  .scroll-cue{left:18px;bottom:15px}
 }
+
+/* Thicker circular portrait border to mask the white outer edge.
+   The overlay does not resize or re-crop the original JPEG. */
+.portrait-ring::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:3;
+  border-radius:50%;
+  border:13px solid color-mix(in srgb,var(--accent) 46%,var(--surface));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),
+    0 0 0 2px color-mix(in srgb,var(--accent) 82%,transparent),
+    0 0 22px color-mix(in srgb,var(--accent) 30%,transparent);
+  pointer-events:none;
+}
+@media(max-width:800px){
+  .portrait-ring::after{border-width:10px}
+}
+@media(max-width:400px){
+  .portrait-ring::after{border-width:9px}
+}
