@@ -250,22 +250,21 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .scroll-cue{left:18px;bottom:15px}
 }
 
-/* A second violet ring sits just inside the existing outer portrait frame.
-   It overlays the image without changing the crop or photo dimensions. */
+/* Four-pixel violet trim flush with the inner edge of the outer frame on all devices. */
 .portrait-ring::before{
   content:"";
   position:absolute;
-  inset:19px;
+  inset:13px;
   z-index:4;
   border:4px solid #9b8cff;
   border-radius:50%;
   pointer-events:none;
 }
 @media(max-width:800px){
-  .portrait-ring::before{inset:16px}
+  .portrait-ring::before{inset:10px}
 }
 @media(max-width:400px){
-  .portrait-ring::before{inset:15px}
+  .portrait-ring::before{inset:9px}
 }
 
 /* Thicker circular portrait border to mask the white outer edge.
