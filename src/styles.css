@@ -654,3 +654,28 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 
 /* Retain the cleaner orbital animation from PR #19: satellite paths stay invisible. */
 .hero-art .stellar-orbit{border-width:0;box-shadow:none}
+
+/* Extremely faint chip-and-trace artwork in the empty top padding of sections.
+   Intentionally local to five transitions, never a full-page overlay/grid. */
+.section .chip-divider{
+ position:absolute;
+ top:16px;
+ left:50%;
+ transform:translateX(-50%);
+ width:min(440px,calc(100% - 52px));
+ height:76px;
+ color:var(--accent);
+ opacity:.105;
+ z-index:0;
+ pointer-events:none;
+ user-select:none;
+}
+.section .chip-divider svg{display:block;width:100%;height:100%}
+:root[data-theme=light] .section .chip-divider{opacity:.085}
+@media(max-width:800px){
+ .section .chip-divider{top:8px;width:min(330px,calc(100% - 40px));height:62px;opacity:.09}
+ :root[data-theme=light] .section .chip-divider{opacity:.075}
+}
+@media(max-width:400px){
+ .section .chip-divider{width:calc(100% - 40px);height:54px;top:6px}
+}
