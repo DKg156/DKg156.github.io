@@ -38,7 +38,7 @@ export default function PortfolioGuide(){
    greetingTimerRef.current=null;
    setMessages([initialMessage]);
    setGreetingPending(false);
-  },1000);
+  },600);
  };
  const closeChat=()=>{
   // Cancel any delayed response and reset all conversation state before closing.
