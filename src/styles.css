@@ -783,3 +783,43 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 @media(prefers-reduced-motion:reduce){
  .section .neon-side-light{display:none;transition:none}
 }
+
+
+/* Barely visible ambient motion behind the hero introduction, without moving content. */
+.hero-copy{position:relative;isolation:isolate}
+.hero-copy-atmosphere{
+ position:absolute;inset:-36px -12px -36px -42px;z-index:-1;
+ overflow:hidden;pointer-events:none;
+}
+.hero-copy-ambient{
+ position:absolute;width:370px;height:310px;left:-95px;top:9%;
+ border-radius:50%;background:radial-gradient(ellipse at center,color-mix(in srgb,var(--accent) 9%,transparent),transparent 70%);
+ filter:blur(38px);opacity:.6;
+}
+.hero-copy-mote{
+ position:absolute;width:3px;height:3px;border-radius:50%;
+ background:var(--accent);opacity:.1;
+}
+.hero-copy-mote.mote-one{top:17%;left:9%}
+.hero-copy-mote.mote-two{top:39%;left:77%;width:2px;height:2px}
+.hero-copy-mote.mote-three{top:72%;left:21%;width:2px;height:2px}
+.hero-copy-mote.mote-four{top:85%;left:89%}
+@media(prefers-reduced-motion:no-preference){
+ .hero-copy-ambient{animation:hero-copy-breathe 24s ease-in-out infinite alternate}
+ .hero-copy-mote.mote-one{animation:hero-copy-drift 27s ease-in-out infinite alternate}
+ .hero-copy-mote.mote-two{animation:hero-copy-drift 32s ease-in-out -8s infinite alternate-reverse}
+ .hero-copy-mote.mote-three{animation:hero-copy-drift 23s ease-in-out -4s infinite alternate}
+ .hero-copy-mote.mote-four{animation:hero-copy-drift 29s ease-in-out -12s infinite alternate-reverse}
+}
+@keyframes hero-copy-breathe{
+ from{transform:translate3d(-14px,8px,0) scale(.95);opacity:.42}
+ to{transform:translate3d(20px,-12px,0) scale(1.06);opacity:.7}
+}
+@keyframes hero-copy-drift{
+ from{transform:translate3d(-5px,10px,0);opacity:.06}
+ to{transform:translate3d(12px,-16px,0);opacity:.12}
+}
+@media(max-width:800px){
+ .hero-copy-atmosphere{inset:-18px 0 -18px -18px}
+ .hero-copy-ambient{width:260px;height:230px;left:-80px}
+}
