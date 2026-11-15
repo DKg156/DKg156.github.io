@@ -28,9 +28,6 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
   display:block;flex:none;width:78%;height:110%;
   object-fit:contain;object-position:center;
   border-radius:0;
-  /* Blend the original portrait's straight side edges into the white circle. */
-  -webkit-mask-image:linear-gradient(to right,transparent 0%,#000 18%,#000 82%,transparent 100%);
-  mask-image:linear-gradient(to right,transparent 0%,#000 18%,#000 82%,transparent 100%);
 }
 .float-card.top{right:-8px;top:28px}
 .float-card.bottom{left:-12px;bottom:25px}
