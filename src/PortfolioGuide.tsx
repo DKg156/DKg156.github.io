@@ -7,9 +7,12 @@ import type {GuideAnswer} from './portfolioGuide';
 type Message={id:number;kind:'visitor'|'guide';text:string;href?:string;label?:string};
 const initialMessage:Message={id:0,kind:'guide',text:"Hi! I'm Dhruv's portfolio chatbot. Curious about his experience, projects, or technical skills? Choose a question below or ask your own."};
 const maxHistory=24;
+const greetingSessionKey='dhruv-portfolio-chat-greeting-shown';
 
 export default function PortfolioGuide(){
  const [open,setOpen]=useState(false);
+ const [showGreeting,setShowGreeting]=useState(false);
+ const greetingSeenRef=useRef(false);
  const [question,setQuestion]=useState('');
  const [messages,setMessages]=useState<Message[]>([initialMessage]);
  const inputRef=useRef<HTMLInputElement>(null);
@@ -18,6 +21,29 @@ export default function PortfolioGuide(){
  const panelRef=useRef<HTMLElement>(null);
  const nextIdRef=useRef(1);
  const wasOpenedRef=useRef(false);
+ useEffect(()=>{
+  // A single, nonblocking greeting per browser tab; never auto-open the chat.
+  try{if(sessionStorage.getItem(greetingSessionKey)==='yes'){greetingSeenRef.current=true;return;}}catch{ /* Storage may be disabled. */ }
+  const appear=window.setTimeout(()=>{
+   if(greetingSeenRef.current)return;
+   greetingSeenRef.current=true;
+   try{sessionStorage.setItem(greetingSessionKey,'yes');}catch{ /* Keep working without storage. */ }
+   setShowGreeting(true);
+  },5000);
+  return()=>window.clearTimeout(appear);
+ },[]);
+ useEffect(()=>{
+  if(!showGreeting)return;
+  const hide=window.setTimeout(()=>setShowGreeting(false),7000);
+  return()=>window.clearTimeout(hide);
+ },[showGreeting]);
+ const openChat=()=>{
+  greetingSeenRef.current=true;
+  try{sessionStorage.setItem(greetingSessionKey,'yes');}catch{ /* Storage may be disabled. */ }
+  setShowGreeting(false);
+  setOpen(true);
+ };
+
  useEffect(()=>{
   if(open){
    wasOpenedRef.current=true;
@@ -58,6 +84,12 @@ export default function PortfolioGuide(){
  const clear=()=>{setMessages([initialMessage]);setQuestion('');inputRef.current?.focus();};
  const followLink=()=>setOpen(false);
  return <div className="portfolio-guide-root">
+  {!open&&showGreeting&&<div className="portfolio-guide-greeting">
+   <button type="button" className="portfolio-guide-greeting-message" onClick={openChat} aria-label="Open chatbot">
+    <span>Hi there! 👋</span><strong>How can I help you today?</strong>
+   </button>
+   <button type="button" className="portfolio-guide-greeting-dismiss" onClick={()=>setShowGreeting(false)} aria-label="Dismiss chatbot greeting"><X size={14}/></button>
+  </div>}
   {open&&<section className="portfolio-guide-panel" id="portfolio-guide-panel" ref={panelRef} role="dialog" aria-label="Chatbot" aria-modal="false">
    <header className="portfolio-guide-head">
     <div className="portfolio-guide-mark"><Bot size={20}/></div>
@@ -82,7 +114,7 @@ export default function PortfolioGuide(){
    </form>
    <p className="portfolio-guide-disclaimer">Answers are based on information published on this portfolio. Chat history stays in this browser tab.</p>
   </section>}
-  <button type="button" ref={triggerRef} className={'portfolio-guide-launcher '+(open?'is-open':'')} onClick={()=>setOpen(state=>!state)} aria-label={open?'Close chatbot':'Open chatbot'} aria-expanded={open} aria-controls="portfolio-guide-panel">
+  <button type="button" ref={triggerRef} className={'portfolio-guide-launcher '+(open?'is-open':'')} onClick={()=>{if(open)setOpen(false);else openChat();}} aria-label={open?'Close chatbot':'Open chatbot'} aria-expanded={open} aria-controls="portfolio-guide-panel">
    {open?<X size={22}/>:<MessageCircle size={23}/>}
    {!open&&<span>Chatbot</span>}
   </button>
