@@ -133,7 +133,7 @@ export function answerPortfolioQuestion(input:string,previousTopic?:string):Guid
    if(score>highScore){best=intent;highScore=score;}
  }
  if(!best||highScore<2){
-  return {text:"I don't have a reliable answer to that in the published portfolio. Try asking about experience, RAG, skills, projects, education, or contact details.",href:'#contact',label:'Contact Me'};
+  return {text:"I don't have a reliable answer to that in Dhruv's portfolio. Try asking about experience, RAG, skills, projects, education, or contact details.",href:'#contact',label:'Contact Me'};
  }
  const answer=best.answer();
  const projectId=['deepfake','plantspector','medpred'].indexOf(best.id);
