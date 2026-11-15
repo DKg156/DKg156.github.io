@@ -250,19 +250,21 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .scroll-cue{left:18px;bottom:15px}
 }
 
-/* Fine violet trim flush against the inside edge of the outer frame.
-   Desktop pointers only; on touch/mobile the portrait has its original frame. */
-.portrait-ring::before{content:none}
-@media(min-width:1024px) and (hover:hover) and (pointer:fine){
-  .portrait-ring::before{
-    content:"";
-    position:absolute;
-    inset:13px;
-    z-index:4;
-    border:4px solid #9b8cff;
-    border-radius:50%;
-    pointer-events:none;
-  }
+/* Four-pixel violet trim flush with the inner edge of the outer frame on all devices. */
+.portrait-ring::before{
+  content:"";
+  position:absolute;
+  inset:13px;
+  z-index:4;
+  border:4px solid #9b8cff;
+  border-radius:50%;
+  pointer-events:none;
+}
+@media(max-width:800px){
+  .portrait-ring::before{inset:10px}
+}
+@media(max-width:400px){
+  .portrait-ring::before{inset:9px}
 }
 
 /* Thicker circular portrait border to mask the white outer edge.
