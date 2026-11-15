@@ -73,7 +73,7 @@ export default function PortfolioGuide(){
    thinkingRef.current=false;
    setThinking(false);
    setMessages(prev=>[...prev.slice(-(maxHistory-1)),answer]);
-  },2000);
+  },3000);
   inputRef.current?.focus();
  };
  const submit=(event:FormEvent<HTMLFormElement>)=>{event.preventDefault();ask(question);};
