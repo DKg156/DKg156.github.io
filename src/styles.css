@@ -18,12 +18,14 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 @media(max-width:550px){.brand-text{font-size:10px}.hero h1{font-size:clamp(39px,11vw,54px)}.hero-description{font-size:14px}.hero-details{flex-wrap:wrap}.project-grid{grid-template-columns:1fr}.project-body p{min-height:0}.stat-line{grid-template-columns:1fr 1fr}.experience-card{padding:23px}.timeline-item{padding-left:31px}.contact h2{font-size:44px}.footer-inner{flex-wrap:wrap}.footer-inner span:nth-child(2){order:3;width:100%}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
-/* Portfolio feedback: compact, unobtrusive portrait and single education entry */
-.hero{min-height:640px}
-.hero-layout{grid-template-columns:minmax(0,1fr) 230px;gap:60px;padding:88px 0 92px}
-.hero-art{height:310px;min-width:0}
-.portrait-ring{width:190px;height:268px;max-width:100%;padding:5px;border-radius:18px;box-shadow:0 14px 35px #0002}
-.portrait-ring{background-image:url('/assets/images/portrait.webp');background-origin:content-box;background-clip:content-box;background-size:calc(100% - 10px) calc(100% - 10px);background-position:center;background-repeat:no-repeat;cursor:default;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.hero-art .orb{display:none}
+/* Retain the original circular portrait and floating cards, at a smaller scale. */
+.hero{min-height:650px}
+.hero-layout{grid-template-columns:minmax(0,1fr) minmax(250px,330px);gap:52px;padding:88px 0 92px}
+.hero-art{height:355px;min-width:0}
+.portrait-ring{width:224px;height:224px;max-width:100%;padding:9px;border-radius:50%;box-shadow:0 0 65px #8270c126}
+.portrait-ring img{border-radius:50%;width:100%;height:100%;object-fit:cover;object-position:center 24%;display:block}
+.float-card.top{right:-8px;top:28px}
+.float-card.bottom{left:-12px;bottom:25px}
 .education-grid{grid-template-columns:minmax(0,610px)}
-@media(max-width:800px){.hero-layout{grid-template-columns:1fr;gap:18px;padding:65px 0 90px}.hero-art{order:0;height:225px}.portrait-ring{width:148px;height:208px}.hero-copy{order:1}.education-grid{grid-template-columns:1fr}}
+@media(max-width:800px){.hero-layout{grid-template-columns:1fr;gap:18px;padding:65px 0 90px}.hero-art{order:0;height:255px}.portrait-ring{width:176px;height:176px}.hero-copy{order:1}.float-card.top{right:18px;top:9px}.float-card.bottom{left:12px;bottom:7px}.education-grid{grid-template-columns:1fr}}
+@media(max-width:400px){.hero-art{height:230px}.portrait-ring{width:156px;height:156px}.float-card{padding:8px;gap:7px}.float-card strong{font-size:10px}.float-card small{font-size:9px}.float-card.top{right:0}.float-card.bottom{left:0}}
