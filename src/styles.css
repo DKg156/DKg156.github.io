@@ -72,7 +72,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero-mesh{opacity:.13;background-size:54px 54px}
 .hero-glow-one{opacity:.12}
 .hero-glow-two{opacity:.08}
-.hero-layout,.scroll-cue{position:relative;z-index:2}
+.hero-layout{position:relative;z-index:2}
 .hero-copy{position:relative;z-index:3}
 .hero-art{position:relative;z-index:3}
 .section-alt:after{
@@ -101,7 +101,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero-glow{z-index:1;mix-blend-mode:screen;filter:blur(68px)}
 .hero-glow-one{opacity:.31}
 .hero-glow-two{opacity:.23}
-.hero-layout,.scroll-cue{z-index:3}
+.hero-layout{z-index:3}
 .portrait-ring{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 55px color-mix(in srgb,var(--accent) 22%,transparent)}
 :root[data-theme=light] .hero-glow{mix-blend-mode:multiply;opacity:.13}
 :root[data-theme=light] .hero:after{opacity:.28}
@@ -231,4 +231,13 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .hero-art .orbit-ring,.hero-art .orbit-particle,.hero h1 em{animation:none!important}
  .scroll-cue svg,.hero-kicker .status-dot,.connect .status-dot{animation:none!important}
  .scroll-progress,.btn,.project-card,.experience-card,.education-card,.certificate,.skill-card,.skill-pills span,.theme-button,.connect,.filters button{transition:none!important}
+}
+
+/* Fix mobile intro alignment: the scroll indicator must not become a flex item. */
+.scroll-cue{position:absolute;z-index:4}
+@media(max-width:800px){
+ .hero-layout{width:calc(100% - 36px);max-width:600px;margin-inline:auto;min-width:0}
+ .hero-copy{min-width:0;width:100%}
+ .hero-kicker{flex-wrap:wrap;row-gap:7px}
+ .scroll-cue{left:18px;bottom:15px}
 }
