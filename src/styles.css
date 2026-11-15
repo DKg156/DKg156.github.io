@@ -776,4 +776,3 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 @media(prefers-reduced-motion:reduce){
  .hero-copy-hover-grid{transition:none}
 }
-}
