@@ -23,7 +23,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero-layout{grid-template-columns:minmax(0,1fr) minmax(250px,330px);gap:52px;padding:88px 0 92px}
 .hero-art{height:370px;min-width:0}
 /* Keep a 250px circular frame without enlarging the face to fill its diameter. */
-.portrait-ring{width:244px;height:244px;max-width:100%;padding:15px;border-radius:50%;box-shadow:0 0 65px #8270c126;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.portrait-ring{width:244px;height:244px;max-width:100%;padding:15px;border-color:transparent;border-radius:50%;box-shadow:0 0 65px #8270c126;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .portrait-ring img{
   display:block;flex:none;width:78%;height:110%;
   object-fit:contain;object-position:center;
@@ -110,7 +110,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 .hero-glow-one{opacity:.31}
 .hero-glow-two{opacity:.23}
 .hero-layout{z-index:3}
-.portrait-ring{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 55px color-mix(in srgb,var(--accent) 22%,transparent)}
+.portrait-ring{box-shadow:0 0 55px color-mix(in srgb,var(--accent) 22%,transparent)}
 :root[data-theme=light] .hero-glow{mix-blend-mode:multiply;opacity:.13}
 :root[data-theme=light] .hero:after{opacity:.28}
 @media(max-width:800px){
@@ -154,7 +154,7 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 @keyframes headline-aurora{from{background-position:0% 50%}to{background-position:100% 50%}}
 @keyframes status-signal{0%,100%{box-shadow:0 0 0 0 #74e2b455,0 0 12px #74e2b4}48%{box-shadow:0 0 0 6px #74e2b400,0 0 20px #74e2b49e}}
 @keyframes scroll-invite{0%,100%{transform:translateY(-2px)}50%{transform:translateY(6px)}}
-@keyframes portrait-halo{0%{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),0 0 35px color-mix(in srgb,var(--accent) 18%,transparent)}100%{box-shadow:0 0 0 1px color-mix(in srgb,var(--accent2) 70%,transparent),0 0 80px color-mix(in srgb,var(--accent) 34%,transparent)}}
+@keyframes portrait-halo{0%{box-shadow:0 0 35px color-mix(in srgb,var(--accent) 18%,transparent)}100%{box-shadow:0 0 80px color-mix(in srgb,var(--accent) 34%,transparent)}}
 @keyframes orbit-spin{to{transform:rotate(360deg)}}
 @keyframes orbit-spin-reverse{to{transform:rotate(-360deg)}}
 @keyframes orbit-point-a{from{transform:translate3d(-7px,8px,0) scale(.8);opacity:.3}to{transform:translate3d(9px,-10px,0) scale(1.2);opacity:1}}
@@ -278,7 +278,6 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
   border:13px solid color-mix(in srgb,var(--accent) 46%,var(--surface));
   box-shadow:
     inset 0 0 0 1px color-mix(in srgb,var(--accent) 55%,transparent),
-    0 0 0 2px color-mix(in srgb,var(--accent) 82%,transparent),
     0 0 22px color-mix(in srgb,var(--accent) 30%,transparent);
   pointer-events:none;
 }
