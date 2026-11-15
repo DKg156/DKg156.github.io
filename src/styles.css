@@ -743,8 +743,8 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  transition:opacity .8s ease-out;
 }
 .section:nth-of-type(odd) .neon-side-light{--neon-side:116%}
-.section.is-illuminated .neon-side-light{opacity:1;transition-duration:.42s}
-:root[data-theme=light] .section.is-illuminated .neon-side-light{opacity:.35}
+.section.is-illuminated .neon-side-light{opacity:.58;transition-duration:.42s}
+:root[data-theme=light] .section.is-illuminated .neon-side-light{opacity:.22}
 @media(max-width:800px){
  .section .neon-side-light{
   background:
