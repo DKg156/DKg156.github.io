@@ -685,8 +685,12 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .section .chip-divider{width:calc(100% - 40px);height:54px;top:6px}
 }
 
-/* Scroll-responsive section scenes. Each section reacts independently as it
-   crosses the viewport; no global grid or replacement section backgrounds. */
+/* Scroll-responsive section scenes. Clip decorative glows to their own
+   sections so their negative offsets never expand the mobile page width.
+   Internal constellation and suggestion-row scrolling stays intact. */
+.section{overflow:clip}
+/* Each section reacts independently as it crosses the viewport; no global
+   grid or replacement section backgrounds. */
 .section>.wrap{position:relative;z-index:1}
 .section .scroll-scene-glow{
  position:absolute;top:12%;left:max(-120px,calc((100% - 1250px)/2 - 160px));
