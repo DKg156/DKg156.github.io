@@ -755,24 +755,24 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 }
 
 
-/* A faint version of the hero grid, only when the title or intro is hovered.
-   No drifting particles, glow animation, or animated text. */
-.hero-copy{position:relative;isolation:isolate}
-.hero-copy-hover-grid{
- position:absolute;inset:-20px -18px -14px -24px;z-index:0;
- border-radius:20px;pointer-events:none;opacity:0;
- background-image:
-  linear-gradient(to right,color-mix(in srgb,var(--accent) 21%,transparent) 1px,transparent 1px),
-  linear-gradient(to bottom,color-mix(in srgb,var(--accent) 21%,transparent) 1px,transparent 1px);
- background-size:70px 70px;
- mask-image:radial-gradient(ellipse 75% 75% at 42% 42%,#000 34%,transparent 100%);
- transition:opacity .5s ease;
+/* Extend the SAME hero mesh toward the left on title/intro hover.
+   No second grid layer: spacing and moving grid lines remain continuous. */
+@property --hero-left-grid-reveal{
+ syntax:"<number>";
+ inherits:false;
+ initial-value:0;
 }
-.hero-copy>:not(.hero-copy-hover-grid){position:relative;z-index:1}
+.hero-mesh{
+ --hero-left-grid-reveal:0;
+ mask-image:linear-gradient(to right,
+  rgba(0,0,0,var(--hero-left-grid-reveal)) 5%,#000 85%);
+ transition:--hero-left-grid-reveal .55s ease;
+}
 @media(hover:hover) and (pointer:fine){
- .hero-copy:has(>h1:hover,>.hero-description:hover) .hero-copy-hover-grid{opacity:.32}
- :root[data-theme=light] .hero-copy:has(>h1:hover,>.hero-description:hover) .hero-copy-hover-grid{opacity:.24}
+ .hero:has(.hero-copy > h1:hover,.hero-copy > .hero-description:hover) .hero-mesh{
+  --hero-left-grid-reveal:.8;
+ }
 }
 @media(prefers-reduced-motion:reduce){
- .hero-copy-hover-grid{transition:none}
+ .hero-mesh{transition:none}
 }
