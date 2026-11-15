@@ -10,6 +10,8 @@ try {
   ['hi','DK-bot'],
   ['what can you do','experience'],
   ['what are his hobbies','sci-fi'],
+  ['what does he like to do','fresh air'],
+  ['what does Dhruv enjoy doing','sci-fi'],
   ['why should we hire Dhruv','LoRA'],
   ['what makes him a good AI Engineer','backend'],
   ['what are his strongest technical skills','retrieval'],
