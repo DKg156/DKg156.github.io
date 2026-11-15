@@ -3,8 +3,7 @@ export const experience = [
   {company:'Global Payments Inc.',role:'Associate Software Engineer',time:'Jul 2022 — Jul 2023',where:'Noida, India',summary:'Backend engineering for enterprise prepaid-card platforms.',points:['Developed REST APIs and microservices using Java and Spring Boot.','Integrated systems with Oracle (PL/SQL) and Cassandra.','Implemented Apache Kafka for internal data migration and wrote JUnit tests.'],tags:['Java','Spring Boot','Kafka','Oracle','Cassandra']}
 ];
 export const education = [
-  {school:'BITS Pilani',degree:'Master of Engineering · Software Systems',time:'2023 — 2025',result:'CGPA 8.04 / 10',location:'Pilani Campus'},
-  {school:'Amity University',degree:'Bachelor of Technology · Computer Science & Engineering',time:'2018 — 2022',result:'CGPA 8.97 / 10',location:'Noida'}
+  {school:'Birla Institute of Technology and Science, Pilani — Pilani Campus',degree:'Master of Engineering · Software Systems',time:'2023 — 2025',result:'CGPA 8.04 / 10',location:'Pilani, Rajasthan'}
 ];
 export const projects = [
   {number:'01',name:'Deepfake Detection',type:'Computer vision / Deep learning',text:'A deepfake detection system using Xception and CLIP, trained and validated on FaceForensics++ and Celeb-DF to compare visual representations.',tags:['Python','Xception','CLIP','Computer Vision'],category:'Machine Learning',color:'purple',url:''},
