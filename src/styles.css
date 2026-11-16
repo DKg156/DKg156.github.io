@@ -791,6 +791,7 @@ main > section.hero{
  min-height:max(650px,calc(100dvh - 112px));
 }
 main.scroll-stack-ready > section{
+ opacity:1;
  position:sticky;
  /* A tall section is allowed to scroll until its final content is visible.
     Only then does the next card physically come over it. */
@@ -803,7 +804,7 @@ main.scroll-stack-ready > section{
  main.scroll-stack-ready > section.card-scroll-flipping{
   transform-origin:center top;
   backface-visibility:hidden;
-  will-change:transform,opacity;
+  will-change:transform;
  }
 }
 main > section:nth-of-type(1){z-index:1}
@@ -813,8 +814,9 @@ main > section:nth-of-type(4){z-index:4}
 main > section:nth-of-type(5){z-index:5}
 main > section:nth-of-type(6){z-index:6}
 main > section:nth-of-type(7){z-index:7}
-/* Reverse traversal brings the previous actual card over the next one.
-   It retains its full sticky height and exposes the previously hidden end. */
+/* The previous real card returns above the newer sticky card.
+   Both cards remain fully opaque during rotation: their text never ghosts
+   through each other when scrolling in either direction. */
 main.scroll-stack-ready > section.card-returning{z-index:20}
 .card-flow-anchor{
  display:block;
