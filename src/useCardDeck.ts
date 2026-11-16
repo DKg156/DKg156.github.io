@@ -1,26 +1,15 @@
-import {useEffect,useState} from 'react';
+import {useEffect} from 'react';
 
 /**
- * Desktop: natural-height cards stack through CSS sticky positioning.
- * The next opaque card comes over the previous one as the page scrolls.
- * Mobile and touch-first devices retain normal document scrolling.
+ * All screen sizes: natural-height cards stack through CSS sticky positioning.
+ * Each opaque section rises over the previous one with native page scrolling.
+ * Back-to-top visits every card in reverse order while other links jump directly.
  */
 export default function useCardDeck(
  setActive:(id:string)=>void,
  progressRef:{current:HTMLDivElement|null},
  navigateSectionRef:{current:(id:string)=>void}
 ){
- const plainScrollQuery='(max-width: 1024px), (pointer: coarse), (hover: none)';
- const [plainScroll,setPlainScroll]=useState(
-  ()=>typeof window!=='undefined'&&window.matchMedia(plainScrollQuery).matches
- );
- useEffect(()=>{
-  const query=window.matchMedia(plainScrollQuery);
-  const onChange=()=>setPlainScroll(query.matches);
-  onChange();
-  query.addEventListener('change',onChange);
-  return ()=>query.removeEventListener('change',onChange);
- },[]);
  useEffect(()=>{
   const main=document.querySelector<HTMLElement>('#main');
   if(!main)return;
@@ -33,41 +22,6 @@ export default function useCardDeck(
    const progress=range>0?Math.min(1,Math.max(0,window.scrollY/range)):0;
    if(progressRef.current)progressRef.current.style.transform='scaleX('+progress+')';
   };
-  const queueProgress=()=>{
-   if(!frame)frame=window.requestAnimationFrame(()=>{
-    frame=0;
-    updateProgress();
-   });
-  };
-
-  if(plainScroll){
-   // Ordinary anchors and unmodified sections; no sticky or card controller.
-   navigateSectionRef.current=id=>{
-    const target=cards.find(card=>card.id===id);
-    if(!target)return;
-    if(window.location.hash!=='#'+id)window.history.pushState(null,'','#'+id);
-    setActive(id);
-    target.scrollIntoView({behavior:reducedMotion.matches?'instant':'smooth',block:'start'});
-   };
-   const observer=('IntersectionObserver' in window)
-    ?new IntersectionObserver(entries=>{
-      for(const entry of entries){
-       if(entry.isIntersecting)setActive(entry.target.id);
-      }
-     },{rootMargin:'-20% 0px -62% 0px',threshold:0})
-    :null;
-   cards.forEach(card=>observer?.observe(card));
-   window.addEventListener('scroll',queueProgress,{passive:true});
-   window.addEventListener('resize',queueProgress);
-   queueProgress();
-   return ()=>{
-    observer?.disconnect();
-    if(frame)window.cancelAnimationFrame(frame);
-    window.removeEventListener('scroll',queueProgress);
-    window.removeEventListener('resize',queueProgress);
-    navigateSectionRef.current=()=>{};
-   };
-  }
 
   // Stable flow markers keep anchor locations correct even when a section
   // has been pinned by sticky positioning.
@@ -102,6 +56,13 @@ export default function useCardDeck(
   main.classList.add('scroll-stack-ready');
   let activeIndex=0;
   let destinationAnimation:Animation|null=null;
+  let journeyFrame=0;
+  let journeyToken=0;
+  const cancelJourney=()=>{
+   journeyToken++;
+   if(journeyFrame)window.cancelAnimationFrame(journeyFrame);
+   journeyFrame=0;
+  };
   const update=()=>{
    frame=0;
    updateProgress();
@@ -138,6 +99,7 @@ export default function useCardDeck(
   const go=(id:string,saveHistory:boolean,focus:boolean,instant=false)=>{
    const index=cards.findIndex(card=>card.id===id);
    if(index<0)return;
+   cancelJourney();
    destinationAnimation?.cancel();
    destinationAnimation=null;
    const card=cards[index];
@@ -165,6 +127,54 @@ export default function useCardDeck(
    }
    queue();
   };
+  // Back to top is intentionally different from every other section link.
+  // Scrub past each real card boundary on the way to Home, never teleport
+  // over the intervening cards. A new navigation or user gesture cancels it.
+  const backToTop=()=>{
+   cancelJourney();
+   destinationAnimation?.cancel();
+   destinationAnimation=null;
+   const startY=window.scrollY;
+   if(startY<=1||reducedMotion.matches){
+    go('home',true,true,true);
+    return;
+   }
+   const token=journeyToken;
+   const headerOffset=(document.querySelector<HTMLElement>('.header')?.offsetHeight??78)+12;
+   const stops=markers.map(marker=>Math.max(0,window.scrollY+marker.getBoundingClientRect().top-headerOffset))
+    .filter(y=>y<startY-3&&y>2).reverse();
+   stops.push(0);
+   const moveTo=(index:number)=>{
+    if(token!==journeyToken)return;
+    const from=window.scrollY;
+    const to=stops[index];
+    const distance=Math.abs(from-to);
+    const duration=Math.min(650,Math.max(280,240+distance*.12));
+    const start=window.performance.now();
+    const tick=(now:number)=>{
+     if(token!==journeyToken)return;
+     const t=Math.min(1,(now-start)/duration);
+     const eased=t*t*(3-2*t);
+     window.scrollTo({top:from+(to-from)*eased,behavior:'instant'});
+     if(t<1){
+      journeyFrame=window.requestAnimationFrame(tick);
+     }else if(index+1<stops.length){
+      journeyFrame=window.requestAnimationFrame(()=>moveTo(index+1));
+     }else{
+      journeyFrame=0;
+      activeIndex=0;
+      setActive('home');
+      if(window.location.hash!=='#home'){
+       window.history.pushState(null,'','#home');
+      }
+      cards[0].focus({preventScroll:true});
+      queue();
+     }
+    };
+    journeyFrame=window.requestAnimationFrame(tick);
+   };
+   moveTo(0);
+  };
   navigateSectionRef.current=id=>go(id,true,true);
   const onClick=(event:MouseEvent)=>{
    if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
@@ -174,6 +184,10 @@ export default function useCardDeck(
    const id=decodeURIComponent(anchor.hash.slice(1));
    if(!cards.some(card=>card.id===id))return;
    event.preventDefault();
+   if(anchor.dataset.scrollThroughCards==='true'){
+    backToTop();
+    return;
+   }
    go(id,true,true);
   };
   const onHistory=()=>{
@@ -183,6 +197,12 @@ export default function useCardDeck(
   const cancelPlacement=()=>{
    destinationAnimation?.cancel();
    destinationAnimation=null;
+   cancelJourney();
+  };
+  const onKeyboardInput=(event:KeyboardEvent)=>{
+   if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key)){
+    cancelJourney();
+   }
   };
   window.addEventListener('scroll',queue,{passive:true});
   window.addEventListener('resize',queue);
@@ -191,6 +211,7 @@ export default function useCardDeck(
   window.addEventListener('hashchange',onHistory);
   window.addEventListener('wheel',cancelPlacement,{passive:true});
   window.addEventListener('touchstart',cancelPlacement,{passive:true});
+  window.addEventListener('keydown',onKeyboardInput);
   if(window.location.hash){
    const id=decodeURIComponent(window.location.hash.slice(1));
    if(cards.some(card=>card.id===id)){
@@ -210,6 +231,7 @@ export default function useCardDeck(
    window.removeEventListener('hashchange',onHistory);
    window.removeEventListener('wheel',cancelPlacement);
    window.removeEventListener('touchstart',cancelPlacement);
+   window.removeEventListener('keydown',onKeyboardInput);
    markers.forEach(marker=>marker.remove());
    cards.forEach(card=>{
     card.style.removeProperty('--stack-card-height');
@@ -226,5 +248,5 @@ export default function useCardDeck(
    });
    main.classList.remove('scroll-stack-ready');
   };
- },[setActive,progressRef,navigateSectionRef,plainScroll]);
+ },[setActive,progressRef,navigateSectionRef]);
 }
