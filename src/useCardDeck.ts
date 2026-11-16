@@ -22,13 +22,6 @@ export default function useCardDeck(
    const progress=range>0?Math.min(1,Math.max(0,window.scrollY/range)):0;
    if(progressRef.current)progressRef.current.style.transform='scaleX('+progress+')';
   };
-  const queueProgress=()=>{
-   if(!frame)frame=window.requestAnimationFrame(()=>{
-    frame=0;
-    updateProgress();
-   });
-  };
-
 
   // Stable flow markers keep anchor locations correct even when a section
   // has been pinned by sticky positioning.
