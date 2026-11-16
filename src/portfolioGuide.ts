@@ -63,7 +63,7 @@ const intents:Intent[]=[
  {id:'thanks',phrases:['thank you','thanks','thank you dk-bot','bye','goodbye'],keywords:[],answer:()=>({text:"You're welcome! You can explore the portfolio sections or reach out through the Contact section.",href:'#contact',label:'Contact Me'})}
 ];
 
-const normalize=(input:string)=>input.toLowerCase().normalize('NFKC').replace(/[^a-z0-9+.#\s-]/g,' ').replace(/\s+/g,' ').trim();
+const normalize=(input:string)=>input.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9+.#\s-]/g,' ').replace(/\s+/g,' ').trim();
 const includesPhrase=(query:string,phrase:string)=>(' '+query+' ').includes(' '+phrase+' ');
 const generic=new Set(['what','how','tell','about','does','have','his','the','can','you','me','dhruv','he','is','of','are','a','in','with']);
 export const guideSuggestions=[
@@ -101,6 +101,31 @@ export function answerPortfolioQuestion(input:string,previousTopic?:string):Guid
  // Avoid making claims about facts not present in the public portfolio.
  if(['salary','compensation','ctc','phone','mobile number','age','relationship','notice period','availability','is he available','when can he join','joining date','start date','personal life','home address'].some(phrase=>includesPhrase(query,phrase))){
   return {text:"That information isn't published on this portfolio. For professional inquiries, please use the contact links.",href:'#contact',label:'Contact Me'};
+ }
+ // Handle resume/CV questions directly; generic intent matching otherwise misses "resume" alone.
+ // Resume-specific details below reflect the published PDF, not the separate featured project list.
+ if(['resume','cv','curriculum vitae'].some(term=>includesPhrase(query,term))){
+  const href='/assets/Dhruv_Khurana_resume.pdf';
+  const withPdf=(text:string):GuideAnswer=>({text,href,label:'Open Resume'});
+  if(['projects','project'].some(term=>includesPhrase(query,term))){
+   return withPdf('The résumé lists Deepfake Detection (Xception and CLIP), Plantspector (ResNet-50 and EDSR), and MedPred (Decision Tree and LightGBM). Open the PDF to see the full descriptions.');
+  }
+  if(['skills','technologies','tech stack'].some(term=>includesPhrase(query,term))){
+   return withPdf('The résumé lists Python, Java and C++, plus RAG, LLM fine-tuning, Haystack, LangChain, FastAPI, ChromaDB, FAISS, PyTorch, TensorFlow, Docker, Azure and AWS, among other skills.');
+  }
+  if(['education','degree','qualification','university'].some(term=>includesPhrase(query,term))){
+   return withPdf('The résumé lists an M.E. in Software Systems from BITS Pilani (2023–2025) and a B.Tech in Computer Science & Engineering from Amity University, Noida (2018–2022).');
+  }
+  if(['experience','jobs','work history','employment'].some(term=>includesPhrase(query,term))){
+   return withPdf('The résumé lists AI Engineer at Emerson (April 2026–present) and Associate Software Engineer at Global Payments (July 2022–July 2023).');
+  }
+  if(['certification','certifications','certified'].some(term=>includesPhrase(query,term))){
+   return withPdf('The résumé lists the AWS Certified Cloud Practitioner certification.');
+  }
+  if(['summary','summarize','summarise','overview','contains','included','about','tell','what is in'].some(term=>includesPhrase(query,term))){
+   return withPdf('Dhruv’s résumé covers AI and backend engineering experience at Emerson and Global Payments, an M.E. from BITS Pilani, ML projects, technical skills and AWS Cloud Practitioner certification.');
+  }
+  return withPdf('You can view Dhruv’s résumé PDF using the Resume button in the site header or the Open Resume link below.');
  }
  // Direct navigation maps destinations to their actual anchors.
  const destinations=[
