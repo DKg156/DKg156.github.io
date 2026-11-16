@@ -54,7 +54,7 @@ export default function App(){
      observer.observe(node);
    });
    return ()=>observer.disconnect();
- },[];
+ },[]);
  useCardDeck(setActive,progressRef,navigateSectionRef);
  useEffect(()=>{const saved=localStorage.getItem('dhruv-theme');if(saved==='light'||saved==='dark')setTheme(saved);},[]);
  useEffect(()=>{document.documentElement.dataset.theme=theme;localStorage.setItem('dhruv-theme',theme);},[theme]);
@@ -137,7 +137,7 @@ export default function App(){
      cleanups.push(()=>{element.classList.remove('spotlight-surface');reset();});
    });
    return()=>cleanups.forEach(cleanup=>cleanup());
- },[];
+ },[]);
 
  return <div className="site">
  <div className="scroll-progress" ref={progressRef} aria-hidden="true"/>
