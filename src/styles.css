@@ -797,6 +797,15 @@ main.scroll-stack-ready > section{
  top:min(90px,calc(100dvh - var(--stack-card-height) - 12px));
  scroll-margin-top:90px;
 }
+/* Compositing hint applies only while a real card is turning.
+   Never promote every long section to a GPU layer permanently. */
+@media(prefers-reduced-motion:no-preference){
+ main.scroll-stack-ready > section.card-scroll-flipping{
+  transform-origin:center top;
+  backface-visibility:hidden;
+  will-change:transform,opacity;
+ }
+}
 main > section:nth-of-type(1){z-index:1}
 main > section:nth-of-type(2){z-index:2}
 main > section:nth-of-type(3){z-index:3}
