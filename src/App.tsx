@@ -29,6 +29,7 @@ export default function App(){
  const searchDialogRef=useRef<HTMLDivElement>(null);
  const filteredActions=quickActions.filter(action=>(action.label+' '+action.detail+' '+action.keywords).toLowerCase().includes(searchQuery.trim().toLowerCase()));
  const progressRef=useRef<HTMLDivElement>(null);
+ const navigateSectionRef=useRef<(id:string)=>void>(()=>{});
  useEffect(()=>{
    // Reveal individual cards with a stagger. Re-observe when the project filter changes.
    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
@@ -116,6 +117,96 @@ export default function App(){
      cards.forEach(card=>card.classList.remove('flip-pending'));
    };
  },[]);
+ // Internal navigation must not depend on CSS smooth-scrolling through
+ // intermediate animated cards. Flip past them quickly and align the final
+ // section with the header; keep regular wheel/touch scrolling untouched.
+ useEffect(()=>{
+   const cards=Array.from(document.querySelectorAll<HTMLElement>('#main > section[id]'));
+   const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+   let stepTimer:number|undefined;
+   let cleanupTimer:number|undefined;
+   let version=0;
+   const clearFlips=()=>{
+     version++;
+     if(stepTimer!==undefined)window.clearTimeout(stepTimer);
+     if(cleanupTimer!==undefined)window.clearTimeout(cleanupTimer);
+     stepTimer=undefined;
+     cleanupTimer=undefined;
+     cards.forEach(card=>card.classList.remove('jump-flip','jump-destination','jump-reset'));
+   };
+   const go=(id:string,addToHistory:boolean)=>{
+     const destinationIndex=cards.findIndex(card=>card.id===id);
+     if(destinationIndex<0)return;
+     clearFlips();
+     const run=version;
+     let currentIndex=0;
+     for(let i=0;i<cards.length;i++){
+       if(cards[i].getBoundingClientRect().top<=window.innerHeight*.35)currentIndex=i;
+     }
+     const direction=destinationIndex>=currentIndex?1:-1;
+     const route:number[]=[];
+     if(reduceMotion.matches||destinationIndex===currentIndex){
+       route.push(destinationIndex);
+     }else{
+       for(let i=currentIndex+direction;direction>0?i<=destinationIndex:i>=destinationIndex;i+=direction)route.push(i);
+     }
+     const showStep=(index:number)=>{
+       if(run!==version)return;
+       const card=cards[route[index]];
+       const last=index===route.length-1;
+       // Cancel the ordinary entry transition before positioning this card.
+       card.classList.add('jump-reset');
+       card.classList.remove('flip-pending','jump-flip','jump-destination');
+       card.querySelectorAll<HTMLElement>('[data-reveal]').forEach(node=>node.classList.add('is-visible'));
+       void card.offsetHeight;
+       card.scrollIntoView({behavior:'instant',block:'start'});
+       card.classList.remove('jump-reset');
+       if(!reduceMotion.matches)card.classList.add(last?'jump-destination':'jump-flip');
+       if(last){
+         if(addToHistory&&window.location.hash!=='#'+id)window.history.pushState(null,'','#'+id);
+         setActive(id);
+         if(!card.hasAttribute('tabindex'))card.tabIndex=-1;
+         card.focus({preventScroll:true});
+         cleanupTimer=window.setTimeout(()=>{
+           if(run===version)cards.forEach(item=>item.classList.remove('jump-flip','jump-destination'));
+         },340);
+       }else{
+         stepTimer=window.setTimeout(()=>showStep(index+1),115);
+       }
+     };
+     showStep(0);
+   };
+   navigateSectionRef.current=id=>go(id,true);
+   const onClick=(event:MouseEvent)=>{
+     if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+     if(!(event.target instanceof Element))return;
+     const anchor=event.target.closest<HTMLAnchorElement>('a[href^="#"]');
+     if(!anchor||anchor.hasAttribute('download')||(anchor.target&&anchor.target!=='_self'))return;
+     const id=decodeURIComponent(anchor.hash.slice(1));
+     if(!cards.some(card=>card.id===id))return;
+     event.preventDefault();
+     go(id,true);
+   };
+   const onLocationChange=()=>{
+     const id=decodeURIComponent(window.location.hash.slice(1));
+     if(cards.some(card=>card.id===id))go(id,false);
+   };
+   const onUserScroll=()=>{if(stepTimer!==undefined)clearFlips();};
+   document.addEventListener('click',onClick);
+   window.addEventListener('popstate',onLocationChange);
+   window.addEventListener('hashchange',onLocationChange);
+   window.addEventListener('wheel',onUserScroll,{passive:true});
+   window.addEventListener('touchstart',onUserScroll,{passive:true});
+   return ()=>{
+     clearFlips();
+     navigateSectionRef.current=()=>{};
+     document.removeEventListener('click',onClick);
+     window.removeEventListener('popstate',onLocationChange);
+     window.removeEventListener('hashchange',onLocationChange);
+     window.removeEventListener('wheel',onUserScroll);
+     window.removeEventListener('touchstart',onUserScroll);
+   };
+ },[]);
  useEffect(()=>{const saved=localStorage.getItem('dhruv-theme');if(saved==='light'||saved==='dark')setTheme(saved);},[]);
  useEffect(()=>{document.documentElement.dataset.theme=theme;localStorage.setItem('dhruv-theme',theme);},[theme]);
  useEffect(()=>{
@@ -147,7 +238,7 @@ export default function App(){
    setSearchOpen(false);
    setMenu(false);
    if(external){if(href.startsWith('mailto:'))window.location.href=href;else window.open(href,'_blank','noopener,noreferrer');}
-   else {window.location.hash=href;}
+   else {window.requestAnimationFrame(()=>navigateSectionRef.current(href.slice(1)));}
  }
  function onSearchKeyDown(event:React.KeyboardEvent<HTMLDivElement>){
    if(event.key==='ArrowDown'){event.preventDefault();setSearchIndex(i=>(i+1)%Math.max(filteredActions.length,1));}
