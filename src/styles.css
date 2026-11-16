@@ -832,3 +832,24 @@ main > section:nth-of-type(7){z-index:7}
 @media print{
  main.scroll-stack-ready > section{position:relative;top:auto;min-height:0}
 }
+
+/* On phones, tablets and touch-first hardware, preserve the same rounded,
+   bordered CARD tiles, but return each to ordinary vertical document flow.
+   No sticky layering, pinning, or compositor-heavy card animation. */
+@media (max-width:1024px), (pointer:coarse), (hover:none){
+ main > section,
+ main.scroll-stack-ready > section{
+  position:relative;
+  top:auto;
+  z-index:auto;
+  min-height:0;
+  margin:0 8px 14px;
+  border-radius:8px;
+  scroll-margin-top:78px;
+ }
+ main > section.hero,
+ main.scroll-stack-ready > section.hero{
+  min-height:0;
+ }
+ main > section:nth-of-type(n){z-index:auto}
+}
