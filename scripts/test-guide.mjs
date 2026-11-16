@@ -21,6 +21,17 @@ try {
   ['what measurable impact has he delivered','15%'],
   ['is he a good fit for this role','job description'],
   ['where is his resume','Resume button'],
+  ['resume','Resume button'],
+  ['can I see his resume','Resume button'],
+  ['show me his CV','Resume button'],
+  ['download résumé','Resume button'],
+  ['where can I download the curriculum vitae','Resume button'],
+  ['tell me about his resume','AI and backend engineering'],
+  ['what projects are in his resume','MedPred'],
+  ['what skills are on his resume','FastAPI'],
+  ['what education is on his resume','BITS Pilani'],
+  ['what experience is in his resume','Global Payments'],
+  ['what certification is on his resume','AWS Certified Cloud Practitioner'],
   ['has he published research papers','does not list'],
   ['what datasets has he worked with','FaceForensics++'],
   ['what is his experience with LLM evaluation','15%'],
@@ -50,6 +61,12 @@ try {
   const actual=answer.text+' '+(answer.href||'');
   assert.ok(actual.toLowerCase().includes(expected.toLowerCase()),`Incorrect answer to "${question}": ${actual}`);
  }
+ for(const question of ['resume','Can I see his CV?','download résumé','tell me about his resume','what projects are in his resume']){
+  const answer=answerPortfolioQuestion(question);
+  assert.equal(answer.href,'/assets/Dhruv_Khurana_resume.pdf',`Broken résumé link for "${question}"`);
+  assert.equal(answer.label,'Open Resume');
+ }
+ assert.doesNotMatch(answerPortfolioQuestion('what projects has he built').text,/MedPred/);
  const plant=answerPortfolioQuestion('tell me about Plantspector');
  assert.equal(plant.topic,'project:2');
  const follow=answerPortfolioQuestion('What models did he use?',plant.topic);
