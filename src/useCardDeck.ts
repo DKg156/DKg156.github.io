@@ -34,16 +34,42 @@ export default function useCardDeck(
    let progressFrame=0;
    let journeyFrame=0;
    let journeyToken=0;
+   let journeyActive=false;
+   const blockWheel=(event:WheelEvent)=>{
+    if(!event.ctrlKey&&event.cancelable)event.preventDefault();
+   };
+   const blockTouchMove=(event:TouchEvent)=>{
+    if(event.cancelable)event.preventDefault();
+   };
+   const blockScrollKeys=(event:KeyboardEvent)=>{
+    if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key)&&event.cancelable){
+     event.preventDefault();
+    }
+   };
+   // Non-passive handlers exist only during the fast return, never normal scrolling.
+   const lockInput=()=>{
+    window.addEventListener('wheel',blockWheel,{passive:false});
+    window.addEventListener('touchmove',blockTouchMove,{passive:false});
+    document.addEventListener('keydown',blockScrollKeys,true);
+   };
+   const unlockInput=()=>{
+    window.removeEventListener('wheel',blockWheel);
+    window.removeEventListener('touchmove',blockTouchMove);
+    document.removeEventListener('keydown',blockScrollKeys,true);
+   };
    const cancelJourney=()=>{
     journeyToken++;
     if(journeyFrame)window.cancelAnimationFrame(journeyFrame);
     journeyFrame=0;
+    journeyActive=false;
+    unlockInput();
    };
    const getTop=(card:HTMLElement)=>{
     const header=document.querySelector<HTMLElement>('.header')?.offsetHeight??68;
     return Math.max(0,window.scrollY+card.getBoundingClientRect().top-header-10);
    };
    const go=(id:string,saveHistory:boolean,focus:boolean)=>{
+    if(journeyActive)return;
     const card=cards.find(item=>item.id===id);
     if(!card)return;
     cancelJourney();
@@ -57,6 +83,7 @@ export default function useCardDeck(
    // Keep the specifically requested Back-to-top journey past each card,
    // but do not animate, rotate, or overlap the cards themselves.
    const backToTop=()=>{
+    if(journeyActive)return;
     cancelJourney();
     if(reducedMotion.matches||window.scrollY<2){
      go('home',true,true);
@@ -66,10 +93,13 @@ export default function useCardDeck(
     const origin=window.scrollY;
     const stops=cards.map(getTop).filter(y=>y>1&&y<origin-2).reverse();
     stops.push(0);
+    const segmentMs=Math.max(65,Math.min(110,Math.round(480/stops.length)));
+    journeyActive=true;
+    lockInput();
     const advance=(index:number)=>{
      if(token!==journeyToken)return;
      const from=window.scrollY,to=stops[index];
-     const duration=Math.min(210,Math.max(130,110+Math.abs(from-to)*.025));
+     const duration=segmentMs;
      const begun=window.performance.now();
      const tick=(now:number)=>{
       if(token!==journeyToken)return;
@@ -80,6 +110,8 @@ export default function useCardDeck(
       else if(index+1<stops.length)journeyFrame=window.requestAnimationFrame(()=>advance(index+1));
       else{
        journeyFrame=0;
+       journeyActive=false;
+       unlockInput();
        setActive('home');
        if(window.location.hash!=='#home')window.history.pushState(null,'','#home');
        cards[0].focus({preventScroll:true});
@@ -104,6 +136,7 @@ export default function useCardDeck(
     const id=decodeURIComponent(anchor.hash.slice(1));
     if(!cards.some(card=>card.id===id))return;
     event.preventDefault();
+    if(journeyActive)return;
     if(anchor.dataset.scrollThroughCards==='true')backToTop();
     else go(id,true,true);
    };
@@ -128,18 +161,11 @@ export default function useCardDeck(
    const queueProgress=()=>{
     if(!progressFrame)progressFrame=window.requestAnimationFrame(updateProgress);
    };
-   const interrupt=()=>cancelJourney();
-   const onKeyDown=(event:KeyboardEvent)=>{
-    if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))cancelJourney();
-   };
    document.addEventListener('click',onClick);
    window.addEventListener('popstate',onHistory);
    window.addEventListener('hashchange',onHistory);
    window.addEventListener('scroll',queueProgress,{passive:true});
    window.addEventListener('resize',queueProgress);
-   window.addEventListener('wheel',interrupt,{passive:true});
-   window.addEventListener('touchstart',interrupt,{passive:true});
-   window.addEventListener('keydown',onKeyDown);
    if(window.location.hash){
     const id=decodeURIComponent(window.location.hash.slice(1));
     if(cards.some(card=>card.id===id))window.requestAnimationFrame(()=>go(id,false,false));
@@ -154,9 +180,6 @@ export default function useCardDeck(
     window.removeEventListener('hashchange',onHistory);
     window.removeEventListener('scroll',queueProgress);
     window.removeEventListener('resize',queueProgress);
-    window.removeEventListener('wheel',interrupt);
-    window.removeEventListener('touchstart',interrupt);
-    window.removeEventListener('keydown',onKeyDown);
     cards.forEach(card=>{
      if(card.dataset.staticCardTabindex){
       card.removeAttribute('tabindex');
@@ -208,10 +231,35 @@ export default function useCardDeck(
   let destinationAnimation:Animation|null=null;
   let journeyFrame=0;
   let journeyToken=0;
+  let journeyActive=false;
+  const blockWheel=(event:WheelEvent)=>{
+   if(!event.ctrlKey&&event.cancelable)event.preventDefault();
+  };
+  const blockTouchMove=(event:TouchEvent)=>{
+   if(event.cancelable)event.preventDefault();
+  };
+  const blockScrollKeys=(event:KeyboardEvent)=>{
+   if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key)&&event.cancelable){
+    event.preventDefault();
+   }
+  };
+  // Non-passive handlers exist only during the fast return, never normal scrolling.
+  const lockInput=()=>{
+   window.addEventListener('wheel',blockWheel,{passive:false});
+   window.addEventListener('touchmove',blockTouchMove,{passive:false});
+   document.addEventListener('keydown',blockScrollKeys,true);
+  };
+  const unlockInput=()=>{
+   window.removeEventListener('wheel',blockWheel);
+   window.removeEventListener('touchmove',blockTouchMove);
+   document.removeEventListener('keydown',blockScrollKeys,true);
+  };
   const cancelJourney=()=>{
    journeyToken++;
    if(journeyFrame)window.cancelAnimationFrame(journeyFrame);
    journeyFrame=0;
+   journeyActive=false;
+   unlockInput();
   };
   const update=()=>{
    frame=0;
@@ -247,6 +295,7 @@ export default function useCardDeck(
    return Math.max(0,window.scrollY+markers[i].getBoundingClientRect().top-offset-12);
   };
   const go=(id:string,saveHistory:boolean,focus:boolean,instant=false)=>{
+   if(journeyActive)return;
    const index=cards.findIndex(card=>card.id===id);
    if(index<0)return;
    cancelJourney();
@@ -281,6 +330,7 @@ export default function useCardDeck(
   // Scrub past each real card boundary on the way to Home, never teleport
   // over the intervening cards. A new navigation or user gesture cancels it.
   const backToTop=()=>{
+   if(journeyActive)return;
    cancelJourney();
    destinationAnimation?.cancel();
    destinationAnimation=null;
@@ -294,12 +344,14 @@ export default function useCardDeck(
    const stops=markers.map(marker=>Math.max(0,window.scrollY+marker.getBoundingClientRect().top-headerOffset))
     .filter(y=>y<startY-3&&y>2).reverse();
    stops.push(0);
+   const segmentMs=Math.max(65,Math.min(110,Math.round(480/stops.length)));
+   journeyActive=true;
+   lockInput();
    const moveTo=(index:number)=>{
     if(token!==journeyToken)return;
     const from=window.scrollY;
     const to=stops[index];
-    const distance=Math.abs(from-to);
-    const duration=Math.min(210,Math.max(130,110+distance*.025));
+    const duration=segmentMs;
     const start=window.performance.now();
     const tick=(now:number)=>{
      if(token!==journeyToken)return;
@@ -312,6 +364,8 @@ export default function useCardDeck(
       journeyFrame=window.requestAnimationFrame(()=>moveTo(index+1));
      }else{
       journeyFrame=0;
+      journeyActive=false;
+      unlockInput();
       activeIndex=0;
       setActive('home');
       if(window.location.hash!=='#home'){
@@ -334,6 +388,7 @@ export default function useCardDeck(
    const id=decodeURIComponent(anchor.hash.slice(1));
    if(!cards.some(card=>card.id===id))return;
    event.preventDefault();
+   if(journeyActive)return;
    if(anchor.dataset.scrollThroughCards==='true'){
     backToTop();
     return;
@@ -347,12 +402,6 @@ export default function useCardDeck(
   const cancelPlacement=()=>{
    destinationAnimation?.cancel();
    destinationAnimation=null;
-   cancelJourney();
-  };
-  const onKeyboardInput=(event:KeyboardEvent)=>{
-   if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key)){
-    cancelJourney();
-   }
   };
   window.addEventListener('scroll',queue,{passive:true});
   window.addEventListener('resize',queue);
@@ -361,7 +410,6 @@ export default function useCardDeck(
   window.addEventListener('hashchange',onHistory);
   window.addEventListener('wheel',cancelPlacement,{passive:true});
   window.addEventListener('touchstart',cancelPlacement,{passive:true});
-  window.addEventListener('keydown',onKeyboardInput);
   if(window.location.hash){
    const id=decodeURIComponent(window.location.hash.slice(1));
    if(cards.some(card=>card.id===id)){
@@ -371,6 +419,7 @@ export default function useCardDeck(
   update();
   return ()=>{
    cancelPlacement();
+   cancelJourney();
    sizeObserver?.disconnect();
    if(frame)window.cancelAnimationFrame(frame);
    navigateSectionRef.current=()=>{};
@@ -381,7 +430,6 @@ export default function useCardDeck(
    window.removeEventListener('hashchange',onHistory);
    window.removeEventListener('wheel',cancelPlacement);
    window.removeEventListener('touchstart',cancelPlacement);
-   window.removeEventListener('keydown',onKeyboardInput);
    markers.forEach(marker=>marker.remove());
    cards.forEach(card=>{
     card.style.removeProperty('--stack-card-height');
