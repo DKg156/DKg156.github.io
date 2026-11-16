@@ -774,8 +774,8 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .hero-mesh{transition:none}
 }
 
-/* Long playing-card sections as in #43. The document itself scrolls.
-   No fixed-size deck, internal card scrollers, wheel gate or empty buffer. */
+/* Opaque, naturally stacked playing-card sections. Each new section covers
+   the previous one without rotation, fading, scroll gating, or snap points. */
 main > section{
  position:relative;
  min-height:calc(100dvh - 112px);
@@ -791,21 +791,15 @@ main > section.hero{
  min-height:max(650px,calc(100dvh - 112px));
 }
 main.scroll-stack-ready > section{
+ opacity:1;
  position:sticky;
  /* A tall section is allowed to scroll until its final content is visible.
     Only then does the next card physically come over it. */
  top:min(90px,calc(100dvh - var(--stack-card-height) - 12px));
  scroll-margin-top:90px;
 }
-/* Compositing hint applies only while a real card is turning.
-   Never promote every long section to a GPU layer permanently. */
-@media(prefers-reduced-motion:no-preference){
- main.scroll-stack-ready > section.card-scroll-flipping{
-  transform-origin:center top;
-  backface-visibility:hidden;
-  will-change:transform,opacity;
- }
-}
+/* Cards remain opaque and untransformed; their natural sticky movement
+   creates the hand-stacked effect in both scroll directions. */
 main > section:nth-of-type(1){z-index:1}
 main > section:nth-of-type(2){z-index:2}
 main > section:nth-of-type(3){z-index:3}
@@ -813,9 +807,6 @@ main > section:nth-of-type(4){z-index:4}
 main > section:nth-of-type(5){z-index:5}
 main > section:nth-of-type(6){z-index:6}
 main > section:nth-of-type(7){z-index:7}
-/* Reverse traversal brings the previous actual card over the next one.
-   It retains its full sticky height and exposes the previously hidden end. */
-main.scroll-stack-ready > section.card-returning{z-index:20}
 .card-flow-anchor{
  display:block;
  position:relative;
