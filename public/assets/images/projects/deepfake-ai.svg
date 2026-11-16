@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+<title id="title">Deepfake detection with artificial intelligence</title>
+<desc id="desc">A stylized digital face split into authentic blue and synthetic magenta halves, with scanning lines and neural AI analysis graphics.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#091328"/><stop offset=".49" stop-color="#13234a"/><stop offset=".51" stop-color="#321a4e"/><stop offset="1" stop-color="#190e34"/></linearGradient>
+<linearGradient id="face" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a6e4ff"/><stop offset=".48" stop-color="#6db3d9"/><stop offset=".52" stop-color="#dca8e6"/><stop offset="1" stop-color="#f17abd"/></linearGradient>
+<linearGradient id="hair" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1c345b"/><stop offset="1" stop-color="#3e224f"/></linearGradient>
+<linearGradient id="divider" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8df9ff" stop-opacity="0"/><stop offset=".25" stop-color="#f0efff"/><stop offset=".72" stop-color="#f88fdb"/><stop offset="1" stop-color="#f88fdb" stop-opacity="0"/></linearGradient>
+<radialGradient id="aura"><stop stop-color="#539bf0" stop-opacity=".33"/><stop offset="1" stop-color="#539bf0" stop-opacity="0"/></radialGradient>
+<pattern id="grid" width="38" height="38" patternUnits="userSpaceOnUse"><path d="M38 0H0V38" fill="none" stroke="#8ab8f3" stroke-opacity=".13"/></pattern>
+<pattern id="pixels" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#f09aff" stroke-opacity=".20"/></pattern>
+<clipPath id="real"><rect x="0" y="0" width="600" height="720"/></clipPath>
+<clipPath id="fake"><rect x="600" y="0" width="600" height="720"/></clipPath>
+<filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="12" stdDeviation="22" flood-color="#03081f" flood-opacity=".8"/></filter>
+<filter id="glow"><feGaussianBlur stdDeviation="22"/></filter>
+</defs>
+<rect width="1200" height="720" fill="url(#bg)"/>
+<path d="M0 0H600V720H0z" fill="#173b66" opacity=".14"/>
+<path d="M600 0H1200V720H600z" fill="#a12379" opacity=".11"/>
+<rect width="1200" height="720" fill="url(#grid)"/>
+<circle cx="555" cy="340" r="335" fill="url(#aura)"/>
+<circle cx="708" cy="322" r="247" fill="#d93ad0" opacity=".10" filter="url(#glow)"/>
+<circle cx="600" cy="347" r="254" fill="none" stroke="#78a6d9" stroke-opacity=".28" stroke-width="2"/>
+<circle cx="600" cy="347" r="286" fill="none" stroke="#95bbdd" stroke-opacity=".16" stroke-width="2" stroke-dasharray="6 18"/>
+<g font-family="Inter,Segoe UI,Arial,sans-serif">
+<g filter="url(#shadow)">
+<path d="M296 712c19-112 92-181 186-205l32-42h175l39 42c95 30 153 101 180 205" fill="#172d51" stroke="#4d96ba" stroke-opacity=".48" stroke-width="3"/>
+<path d="M520 460v76c24 38 126 52 162-1v-73" fill="url(#face)"/>
+<path d="M476 287c-13-87 28-165 125-165 100 0 143 75 127 169l-20 111c-22 95-70 142-108 144-49 0-104-56-118-144z" fill="url(#face)" stroke="#a9d5e9" stroke-opacity=".6" stroke-width="3"/>
+<path d="M474 311c-25-118 9-204 125-210 120-7 164 85 132 206l-20-46-19-74c-25 13-62 22-94 20-47-1-89-8-105-33l-11 92z" fill="url(#hair)"/>
+<path d="M489 311c-38-31-29 50 8 76M714 306c35-25 24 51-8 78" fill="url(#face)" stroke="#76b7dc" stroke-width="3"/>
+<path d="M519 319q32-19 61 0M626 319q29-19 56 0" fill="none" stroke="#153d62" stroke-width="10" stroke-linecap="round"/>
+<path d="M531 331q24 15 46-1M632 330q25 17 44 0" fill="none" stroke="#142749" stroke-width="5" stroke-linecap="round"/>
+<path d="M602 340l-13 63 21 9" fill="none" stroke="#29547a" stroke-width="5" stroke-linecap="round"/>
+<path d="M562 457q40 19 79 0" fill="none" stroke="#71436e" stroke-width="6" stroke-linecap="round"/>
+</g>
+<g clip-path="url(#fake)">
+<path d="M476 287c-13-87 28-165 125-165 100 0 143 75 127 169l-20 111c-22 95-70 142-108 144-49 0-104-56-118-144z" fill="#b342c3" opacity=".23"/>
+<rect x="602" y="150" width="240" height="393" fill="url(#pixels)" opacity=".6"/>
+<path d="M610 172l100 74-90 83 114 73-109 94" stroke="#f47bc6" stroke-width="2" fill="none" opacity=".45"/>
+<path d="M667 214h125" stroke="#ff76ca" stroke-width="5" opacity="0.42"/><path d="M667 245h178" stroke="#5fcde9" stroke-width="2" opacity="0.14"/><path d="M667 276h125" stroke="#5fcde9" stroke-width="2" opacity="0.14"/><path d="M667 307h178" stroke="#ff76ca" stroke-width="2" opacity="0.14"/><path d="M667 338h125" stroke="#5fcde9" stroke-width="5" opacity="0.42"/><path d="M667 369h178" stroke="#5fcde9" stroke-width="2" opacity="0.14"/><path d="M667 400h125" stroke="#ff76ca" stroke-width="2" opacity="0.14"/><path d="M667 431h178" stroke="#5fcde9" stroke-width="2" opacity="0.14"/><path d="M667 462h125" stroke="#5fcde9" stroke-width="5" opacity="0.42"/><path d="M667 493h178" stroke="#ff76ca" stroke-width="2" opacity="0.14"/><path d="M667 524h125" stroke="#5fcde9" stroke-width="2" opacity="0.14"/>
+<rect x="611" y="240" width="104" height="11" fill="#ff7ecc" opacity=".7"/>
+<rect x="624" y="385" width="140" height="10" fill="#5deafa" opacity=".46"/>
+<rect x="601" y="465" width="102" height="12" fill="#ef67db" opacity=".62"/>
+</g>
+<rect x="610" y="124" width="22" height="6" fill="#66dbed" opacity="0.1"/><rect x="677" y="221" width="5" height="3" fill="#ff5cbe" opacity="0.2"/><rect x="744" y="318" width="5" height="3" fill="#66dbed" opacity="0.30000000000000004"/><rect x="811" y="415" width="5" height="3" fill="#ff5cbe" opacity="0.4"/><rect x="878" y="512" width="22" height="3" fill="#66dbed" opacity="0.1"/><rect x="945" y="141" width="5" height="6" fill="#ff5cbe" opacity="0.2"/><rect x="627" y="238" width="5" height="3" fill="#66dbed" opacity="0.30000000000000004"/><rect x="694" y="335" width="5" height="3" fill="#ff5cbe" opacity="0.4"/><rect x="761" y="432" width="22" height="3" fill="#66dbed" opacity="0.1"/><rect x="828" y="529" width="5" height="3" fill="#ff5cbe" opacity="0.2"/><rect x="895" y="158" width="5" height="6" fill="#66dbed" opacity="0.30000000000000004"/><rect x="962" y="255" width="5" height="3" fill="#ff5cbe" opacity="0.4"/><rect x="644" y="352" width="22" height="3" fill="#66dbed" opacity="0.1"/><rect x="711" y="449" width="5" height="3" fill="#ff5cbe" opacity="0.2"/><rect x="778" y="546" width="5" height="3" fill="#66dbed" opacity="0.30000000000000004"/><rect x="845" y="175" width="5" height="6" fill="#ff5cbe" opacity="0.4"/><rect x="912" y="272" width="22" height="3" fill="#66dbed" opacity="0.1"/><rect x="979" y="369" width="5" height="3" fill="#ff5cbe" opacity="0.2"/><rect x="661" y="466" width="5" height="3" fill="#66dbed" opacity="0.30000000000000004"/><rect x="728" y="563" width="5" height="3" fill="#ff5cbe" opacity="0.4"/><rect x="795" y="192" width="22" height="6" fill="#66dbed" opacity="0.1"/><rect x="862" y="289" width="5" height="3" fill="#ff5cbe" opacity="0.2"/><rect x="929" y="386" width="5" height="3" fill="#66dbed" opacity="0.30000000000000004"/><rect x="611" y="483" width="5" height="3" fill="#ff5cbe" opacity="0.4"/><rect x="678" y="580" width="22" height="3" fill="#66dbed" opacity="0.1"/><rect x="745" y="209" width="5" height="6" fill="#ff5cbe" opacity="0.2"/><rect x="812" y="306" width="5" height="3" fill="#66dbed" opacity="0.30000000000000004"/><rect x="879" y="403" width="5" height="3" fill="#ff5cbe" opacity="0.4"/><rect x="946" y="500" width="22" height="3" fill="#66dbed" opacity="0.1"/><rect x="628" y="129" width="5" height="3" fill="#ff5cbe" opacity="0.2"/><rect x="695" y="226" width="5" height="6" fill="#66dbed" opacity="0.30000000000000004"/><rect x="762" y="323" width="5" height="3" fill="#ff5cbe" opacity="0.4"/><rect x="829" y="420" width="22" height="3" fill="#66dbed" opacity="0.1"/><rect x="896" y="517" width="5" height="3" fill="#ff5cbe" opacity="0.2"/><rect x="963" y="146" width="5" height="3" fill="#66dbed" opacity="0.30000000000000004"/><rect x="645" y="243" width="5" height="6" fill="#ff5cbe" opacity="0.4"/><rect x="712" y="340" width="22" height="3" fill="#66dbed" opacity="0.1"/><rect x="779" y="437" width="5" height="3" fill="#ff5cbe" opacity="0.2"/><rect x="846" y="534" width="5" height="3" fill="#66dbed" opacity="0.30000000000000004"/><rect x="913" y="163" width="5" height="3" fill="#ff5cbe" opacity="0.4"/><rect x="980" y="260" width="22" height="6" fill="#66dbed" opacity="0.1"/><rect x="662" y="357" width="5" height="3" fill="#ff5cbe" opacity="0.2"/><rect x="729" y="454" width="5" height="3" fill="#66dbed" opacity="0.30000000000000004"/><rect x="796" y="551" width="5" height="3" fill="#ff5cbe" opacity="0.4"/><rect x="863" y="180" width="22" height="3" fill="#66dbed" opacity="0.1"/><rect x="930" y="277" width="5" height="6" fill="#ff5cbe" opacity="0.2"/><rect x="612" y="374" width="5" height="3" fill="#66dbed" opacity="0.30000000000000004"/><rect x="679" y="471" width="5" height="3" fill="#ff5cbe" opacity="0.4"/>
+<path d="M600 90V636" stroke="url(#divider)" stroke-width="7"/>
+<g stroke="#78e9ff" stroke-width="4" opacity=".8" fill="none"><path d="M398 233v-31h31M802 233v-31h-31M398 440v31h31M802 440v31h-31"/></g>
+<rect x="108" y="250" width="232" height="116" rx="21" fill="#132b50" stroke="#5baed4" stroke-opacity=".54" stroke-width="2"/>
+<circle cx="145" cy="294" r="14" fill="#6eeddd"/><path d="M139 294l5 5 9-10" fill="none" stroke="#0b3250" stroke-width="4" stroke-linecap="round"/>
+<text x="173" y="300" font-size="23" font-weight="750" fill="#c9f7ff">AUTHENTIC</text>
+<text x="144" y="340" font-size="16" letter-spacing="1.1" fill="#9ebbd8">IMAGE ANALYSIS</text>
+<rect x="858" y="250" width="250" height="116" rx="21" fill="#3d204e" stroke="#ec79d1" stroke-opacity=".59" stroke-width="2"/>
+<path d="M898 283l15 28h-30z" fill="#ff8dcc"/><path d="M898 291v9" stroke="#51244d" stroke-width="3"/><circle cx="898" cy="305" r="2" fill="#51244d"/>
+<text x="927" y="300" font-size="21" font-weight="750" fill="#ffd6f1">SYNTHETIC</text>
+<text x="889" y="340" font-size="16" letter-spacing="1.1" fill="#e4afd7">AI DETECTION</text>
+<rect x="466" y="600" width="268" height="53" rx="26" fill="#132446" stroke="#8cb1e4" stroke-opacity=".66" stroke-width="2"/>
+<circle cx="494" cy="626" r="8" fill="#84ebed"/><text x="604" y="635" text-anchor="middle" font-size="18" fill="#e1ecff" font-weight="700" letter-spacing="1.5">DEEPFAKE SCAN</text>
+</g></svg>
