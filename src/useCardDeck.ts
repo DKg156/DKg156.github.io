@@ -78,8 +78,11 @@ export default function useCardDeck(
    const rects=cards.map(card=>card.getBoundingClientRect());
    let visibleIndex=0;
    markerY.forEach((y,i)=>{if(y<=viewport*.55)visibleIndex=i;});
-   const start=viewport*.92;
-   const finish=viewport*.56;
+   // Each marker sits exactly after the preceding card in document flow.
+   // Wait until its end has moved into the lower reading area before
+   // starting any flip. This is not an artificial wheel/scroll buffer.
+   const start=viewport*.78;
+   const finish=viewport*.43;
    cards.forEach((card,i)=>{
     const rect=rects[i];
     const visible=rect.bottom>0&&rect.top<viewport;
@@ -101,15 +104,19 @@ export default function useCardDeck(
      return;
     }
     const y=markerY[i];
-    if(y>viewport+48||y<=finish){
+    // Before this threshold, the full preceding card remains readable.
+    // No transform or faded tile exists ahead of the transition.
+    if(y>=start||y<=finish){
      clearFlip(card);
      return;
     }
-    const linear=Math.max(0,Math.min(1,(start-y)/(start-finish)));
-    const eased=linear*linear*(3-2*linear);
-    const remaining=1-eased;
-    card.style.transform='perspective(1500px) rotateX('+(-19*remaining).toFixed(2)+'deg) translateY('+(22*remaining).toFixed(2)+'px)';
-    card.style.opacity=(1-.48*remaining).toFixed(3);
+    const progress=Math.max(0,Math.min(1,(start-y)/(start-finish)));
+    // Starts and ends flat. The shallow vertical pitch happens between
+    // those points, eliminating the sudden first-frame rotation.
+    // The same geometry is used by direct section navigation.
+    const turn=Math.sin(Math.PI*progress);
+    card.style.transform='perspective(1500px) rotateX('+(-19*turn).toFixed(2)+'deg) translateY('+(22*turn).toFixed(2)+'px)';
+    card.style.opacity=(1-.25*turn).toFixed(3);
     if(!flipping.has(card)){
      flipping.add(card);
      card.classList.add('card-scroll-flipping');
@@ -142,42 +149,29 @@ export default function useCardDeck(
    interrupt();
    const token=navigationToken;
    const direction=targetIndex>=activeIndex?1:-1;
-   const steps:number[]=[];
-   if(instant||motion.matches||targetIndex===activeIndex){
-    steps.push(targetIndex);
-   }else{
-    for(let i=activeIndex+direction;direction>0?i<=targetIndex:i>=targetIndex;i+=direction){
-     steps.push(i);
-    }
-   }
+   const card=cards[targetIndex];
    navigating=true;
+   reveal(card);
+   // One direct jump to the requested section. Intervening sections are
+   // never animated, scrolled through, or displayed as placeholders.
+   window.scrollTo({top:locate(targetIndex),behavior:'instant'});
    void (async()=>{
-    for(let n=0;n<steps.length;n++){
-     if(token!==navigationToken)return;
-     const step=steps[n];
-     const card=cards[step];
-     reveal(card);
-     // This is an instantaneous position change, not a smooth-page scroll.
-     // The real section panel performs the visible vertical card turn.
-     window.scrollTo({top:locate(step),behavior:'instant'});
-     if(!instant&&!motion.matches && 'animate' in card){
-      const last=n===steps.length-1;
-      currentAnimation=card.animate([
-       {opacity:.52,transform:'perspective(1500px) rotateX('+(direction>0?-19:19)+'deg) translateY('+(direction>0?22:-22)+'px)'},
-       {opacity:1,transform:'perspective(1500px) rotateX(0deg) translateY(0)'}
-      ],{duration:last?310:115,easing:'cubic-bezier(.16,.7,.2,1)'});
-      await currentAnimation.finished.catch(()=>{});
-      currentAnimation=null;
-     }
+    if(!instant&&!motion.matches&&'animate' in card){
+     currentAnimation=card.animate([
+      {opacity:.75,transform:'perspective(1500px) rotateX('+(direction>0?-19:19)+'deg) translateY('+(direction>0?22:-22)+'px)'},
+      {opacity:1,transform:'perspective(1500px) rotateX(0deg) translateY(0)'}
+     ],{duration:310,easing:'cubic-bezier(.16,.7,.2,1)'});
+     await currentAnimation.finished.catch(()=>{});
+     currentAnimation=null;
     }
     if(token!==navigationToken)return;
     navigating=false;
     activeIndex=targetIndex;
     setActive(id);
-    if(saveHistory && window.location.hash!=='#'+id){
+    if(saveHistory&&window.location.hash!=='#'+id){
      window.history.pushState(null,'','#'+id);
     }
-    if(focus)cards[targetIndex].focus({preventScroll:true});
+    if(focus)card.focus({preventScroll:true});
     queue();
    })();
   };
