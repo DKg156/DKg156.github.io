@@ -784,7 +784,7 @@ main{
 main > section{
  margin:0 clamp(9px,1.7vw,26px) 16px;
  border:1px solid color-mix(in srgb,var(--accent) 20%,var(--border));
- border-radius:clamp(18px,2vw,28px);
+ border-radius:8px;
  box-shadow:0 -14px 48px rgba(0,0,0,.23);
 }
 main > .hero,
@@ -809,7 +809,7 @@ main > section:nth-of-type(7){z-index:7}
 .footer{position:relative;z-index:8}
 @media(max-width:800px){
  main{--stack-top:78px;--stack-edge:10px}
- main > section{margin-inline:8px;margin-bottom:10px;border-radius:18px}
+ main > section{margin-inline:8px;margin-bottom:10px;border-radius:6px}
 }
 @media(prefers-reduced-motion:reduce){
  /* Keep the tile styling but return to ordinary scrolling. */
