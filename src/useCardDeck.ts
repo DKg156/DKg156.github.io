@@ -1,21 +1,171 @@
-import {useEffect} from 'react';
+import {useEffect,useState} from 'react';
 
 /**
- * All screen sizes: natural-height cards stack through CSS sticky positioning.
- * Each opaque section rises over the previous one with native page scrolling.
- * Back-to-top visits every card in reverse order while other links jump directly.
+ * Desktop has native CSS sticky card stacking. Touch-first devices and
+ * narrower viewports keep the same card styling but scroll in normal flow.
+ * Back-to-top travels through section boundaries in either mode.
  */
 export default function useCardDeck(
  setActive:(id:string)=>void,
  progressRef:{current:HTMLDivElement|null},
  navigateSectionRef:{current:(id:string)=>void}
 ){
+ const simpleQuery='(max-width: 1024px), (pointer: coarse), (hover: none)';
+ const [simpleScroll,setSimpleScroll]=useState(
+  ()=>typeof window!=='undefined'&&window.matchMedia(simpleQuery).matches
+ );
+ useEffect(()=>{
+  const query=window.matchMedia(simpleQuery);
+  const onChange=()=>setSimpleScroll(query.matches);
+  onChange();
+  query.addEventListener('change',onChange);
+  return ()=>query.removeEventListener('change',onChange);
+ },[]);
  useEffect(()=>{
   const main=document.querySelector<HTMLElement>('#main');
   if(!main)return;
   const cards=Array.from(main.querySelectorAll<HTMLElement>(':scope > section[id]'));
   if(!cards.length)return;
   const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if(simpleScroll){
+   // No sticky measurements, ResizeObserver, scroll transforms or large-card
+   // animation on phones, tablets, or other touch-first devices.
+   let progressFrame=0;
+   let journeyFrame=0;
+   let journeyToken=0;
+   const cancelJourney=()=>{
+    journeyToken++;
+    if(journeyFrame)window.cancelAnimationFrame(journeyFrame);
+    journeyFrame=0;
+   };
+   const getTop=(card:HTMLElement)=>{
+    const header=document.querySelector<HTMLElement>('.header')?.offsetHeight??68;
+    return Math.max(0,window.scrollY+card.getBoundingClientRect().top-header-10);
+   };
+   const go=(id:string,saveHistory:boolean,focus:boolean)=>{
+    const card=cards.find(item=>item.id===id);
+    if(!card)return;
+    cancelJourney();
+    window.scrollTo({top:getTop(card),behavior:'instant'});
+    if(saveHistory&&window.location.hash!=='#'+id){
+     window.history.pushState(null,'','#'+id);
+    }
+    setActive(id);
+    if(focus)card.focus({preventScroll:true});
+   };
+   // Keep the specifically requested Back-to-top journey past each card,
+   // but do not animate, rotate, or overlap the cards themselves.
+   const backToTop=()=>{
+    cancelJourney();
+    if(reducedMotion.matches||window.scrollY<2){
+     go('home',true,true);
+     return;
+    }
+    const token=journeyToken;
+    const origin=window.scrollY;
+    const stops=cards.map(getTop).filter(y=>y>1&&y<origin-2).reverse();
+    stops.push(0);
+    const advance=(index:number)=>{
+     if(token!==journeyToken)return;
+     const from=window.scrollY,to=stops[index];
+     const duration=Math.min(540,Math.max(250,220+Math.abs(from-to)*.1));
+     const begun=window.performance.now();
+     const tick=(now:number)=>{
+      if(token!==journeyToken)return;
+      const p=Math.min(1,(now-begun)/duration);
+      const eased=p*p*(3-2*p);
+      window.scrollTo({top:from+(to-from)*eased,behavior:'instant'});
+      if(p<1)journeyFrame=window.requestAnimationFrame(tick);
+      else if(index+1<stops.length)journeyFrame=window.requestAnimationFrame(()=>advance(index+1));
+      else{
+       journeyFrame=0;
+       setActive('home');
+       if(window.location.hash!=='#home')window.history.pushState(null,'','#home');
+       cards[0].focus({preventScroll:true});
+      }
+     };
+     journeyFrame=window.requestAnimationFrame(tick);
+    };
+    advance(0);
+   };
+   cards.forEach(card=>{
+    if(!card.hasAttribute('tabindex')){
+     card.tabIndex=-1;
+     card.dataset.staticCardTabindex='true';
+    }
+   });
+   navigateSectionRef.current=id=>go(id,true,true);
+   const onClick=(event:MouseEvent)=>{
+    if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+    if(!(event.target instanceof Element))return;
+    const anchor=event.target.closest<HTMLAnchorElement>('a[href^="#"]');
+    if(!anchor||anchor.hasAttribute('download')||(anchor.target&&anchor.target!=='_self'))return;
+    const id=decodeURIComponent(anchor.hash.slice(1));
+    if(!cards.some(card=>card.id===id))return;
+    event.preventDefault();
+    if(anchor.dataset.scrollThroughCards==='true')backToTop();
+    else go(id,true,true);
+   };
+   const onHistory=()=>{
+    const id=decodeURIComponent(window.location.hash.slice(1));
+    if(cards.some(card=>card.id===id))go(id,false,true);
+   };
+   const observer=('IntersectionObserver' in window)
+    ?new IntersectionObserver(entries=>{
+      for(const entry of entries)if(entry.isIntersecting)setActive(entry.target.id);
+     },{rootMargin:'-20% 0px -62% 0px',threshold:0})
+    :null;
+   cards.forEach(card=>observer?.observe(card));
+   const updateProgress=()=>{
+    progressFrame=0;
+    const range=document.documentElement.scrollHeight-window.innerHeight;
+    if(progressRef.current){
+     progressRef.current.style.transform='scaleX('+
+      (range>0?Math.min(1,Math.max(0,window.scrollY/range)):0)+')';
+    }
+   };
+   const queueProgress=()=>{
+    if(!progressFrame)progressFrame=window.requestAnimationFrame(updateProgress);
+   };
+   const interrupt=()=>cancelJourney();
+   const onKeyDown=(event:KeyboardEvent)=>{
+    if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))cancelJourney();
+   };
+   document.addEventListener('click',onClick);
+   window.addEventListener('popstate',onHistory);
+   window.addEventListener('hashchange',onHistory);
+   window.addEventListener('scroll',queueProgress,{passive:true});
+   window.addEventListener('resize',queueProgress);
+   window.addEventListener('wheel',interrupt,{passive:true});
+   window.addEventListener('touchstart',interrupt,{passive:true});
+   window.addEventListener('keydown',onKeyDown);
+   if(window.location.hash){
+    const id=decodeURIComponent(window.location.hash.slice(1));
+    if(cards.some(card=>card.id===id))window.requestAnimationFrame(()=>go(id,false,false));
+   }
+   queueProgress();
+   return ()=>{
+    cancelJourney();
+    observer?.disconnect();
+    if(progressFrame)window.cancelAnimationFrame(progressFrame);
+    document.removeEventListener('click',onClick);
+    window.removeEventListener('popstate',onHistory);
+    window.removeEventListener('hashchange',onHistory);
+    window.removeEventListener('scroll',queueProgress);
+    window.removeEventListener('resize',queueProgress);
+    window.removeEventListener('wheel',interrupt);
+    window.removeEventListener('touchstart',interrupt);
+    window.removeEventListener('keydown',onKeyDown);
+    cards.forEach(card=>{
+     if(card.dataset.staticCardTabindex){
+      card.removeAttribute('tabindex');
+      delete card.dataset.staticCardTabindex;
+     }
+    });
+    navigateSectionRef.current=()=>{};
+   };
+  }
   let frame=0;
   const updateProgress=()=>{
    const range=document.documentElement.scrollHeight-window.innerHeight;
@@ -248,5 +398,5 @@ export default function useCardDeck(
    });
    main.classList.remove('scroll-stack-ready');
   };
- },[setActive,progressRef,navigateSectionRef]);
+ },[setActive,progressRef,navigateSectionRef,simpleScroll]);
 }
