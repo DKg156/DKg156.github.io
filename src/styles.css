@@ -774,122 +774,58 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .hero-mesh{transition:none}
 }
 
-/* Actual section cards replace one another in place.
-   Long sections scroll internally; the viewport does not scroll past cards. */
-body.card-deck-enabled{overflow:hidden}
-body.card-deck-enabled .site{
- height:100vh;
- height:100dvh;
- min-height:0;
- overflow:hidden;
- display:flex;
- flex-direction:column;
-}
-body.card-deck-enabled .header{position:relative;flex-shrink:0}
-body.card-deck-enabled .footer{
+/* Long playing-card sections as in #43. The document itself scrolls.
+   No fixed-size deck, internal card scrollers, wheel gate or empty buffer. */
+main > section{
  position:relative;
- z-index:15;
- flex-shrink:0;
- padding:12px 0;
-}
-body.card-deck-enabled .footer-inner{min-height:30px}
-main.card-deck-ready{
- position:relative;
- flex:1;
- min-height:0;
- overflow:hidden;
- isolation:isolate;
- perspective:1500px;
-}
-main.card-deck-ready > section{
- position:absolute;
- inset:12px clamp(10px,2vw,28px);
- width:auto;
- height:auto;
- min-height:0;
- margin:0;
- padding-top:clamp(42px,6vh,92px);
- padding-bottom:clamp(42px,6vh,92px);
- overflow-x:hidden;
- overflow-y:auto;
- overscroll-behavior-y:contain;
- scrollbar-gutter:stable;
- scroll-behavior:auto;
- border:1px solid color-mix(in srgb,var(--accent) 24%,var(--border));
+ min-height:calc(100dvh - 112px);
+ margin:0 clamp(9px,1.7vw,26px);
+ border:1px solid color-mix(in srgb,var(--accent) 20%,var(--border));
  border-radius:8px;
- box-shadow:0 15px 40px rgba(0,0,0,.20);
  background:var(--bg);
- visibility:hidden;
- opacity:0;
- pointer-events:none;
- transform-origin:center center;
+ box-shadow:0 -12px 35px rgba(0,0,0,.17);
 }
-main.card-deck-ready > section.section-alt,
-main.card-deck-ready > section.contact{background:var(--bg2)}
-main.card-deck-ready > section.deck-current{
- visibility:visible;
- opacity:1;
- pointer-events:auto;
- z-index:2;
+main > section.section-alt,
+main > section.contact{background:var(--bg2)}
+main > section.hero{
+ min-height:max(650px,calc(100dvh - 112px));
 }
-main.card-deck-ready > section.deck-outgoing{
- visibility:visible;
- opacity:1;
- pointer-events:none;
- z-index:3;
+main.scroll-stack-ready > section{
+ position:sticky;
+ /* A tall section is allowed to scroll until its final content is visible.
+    Only then does the next card physically come over it. */
+ top:min(90px,calc(100dvh - var(--stack-card-height) - 12px));
+ scroll-margin-top:90px;
 }
-main.card-deck-ready > .hero{
- min-height:0;
+main > section:nth-of-type(1){z-index:1}
+main > section:nth-of-type(2){z-index:2}
+main > section:nth-of-type(3){z-index:3}
+main > section:nth-of-type(4){z-index:4}
+main > section:nth-of-type(5){z-index:5}
+main > section:nth-of-type(6){z-index:6}
+main > section:nth-of-type(7){z-index:7}
+.card-flow-anchor{
  display:block;
- padding-top:0;
- padding-bottom:0;
+ position:relative;
+ height:0;
+ margin:0;
+ padding:0;
+ border:0;
+ pointer-events:none;
 }
-main.card-deck-ready > .hero .hero-layout{
- padding-top:clamp(55px,8vh,105px);
- padding-bottom:clamp(80px,9vh,120px);
-}
-main.card-deck-ready > .hero .scroll-cue{bottom:14px}
-main.card-deck-ready > section:focus{outline:none}
-main.card-deck-ready > section:focus-visible{
- outline:2px solid var(--accent);
- outline-offset:-4px;
-}
+.footer{position:relative;z-index:8}
 @media(max-width:800px){
- main.card-deck-ready > section{
-  inset:8px;
-  padding-top:clamp(32px,5vh,70px);
-  padding-bottom:clamp(36px,5vh,70px);
-  border-radius:6px;
-  scrollbar-gutter:auto;
+ main > section{margin-inline:8px;border-radius:6px;min-height:calc(100dvh - 88px)}
+ main > section.hero{min-height:calc(100dvh - 88px)}
+ main.scroll-stack-ready > section{
+  top:min(78px,calc(100dvh - var(--stack-card-height) - 8px));
+  scroll-margin-top:78px;
  }
- main.card-deck-ready > .hero{
-  padding-top:0;
-  padding-bottom:0;
- }
- main.card-deck-ready > .hero .hero-layout{
-  padding-top:48px;
-  padding-bottom:80px;
- }
- body.card-deck-enabled .footer{padding:8px 0}
 }
 @media(prefers-reduced-motion:reduce){
- main.card-deck-ready > section{scroll-behavior:auto}
+ /* Accessible linear scrolling without sticky overlap or 3D motion. */
+ main.scroll-stack-ready > section{position:relative;top:auto}
 }
 @media print{
- body.card-deck-enabled{overflow:visible}
- body.card-deck-enabled .site{
-  height:auto;
-  overflow:visible;
-  display:block;
- }
- main.card-deck-ready{overflow:visible;display:block}
- main.card-deck-ready > section{
-  position:relative;
-  inset:auto;
-  visibility:visible;
-  opacity:1;
-  height:auto;
-  overflow:visible;
-  margin:14px 0;
- }
+ main.scroll-stack-ready > section{position:relative;top:auto;min-height:0}
 }
