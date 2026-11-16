@@ -26,7 +26,7 @@ export default function useCardDeck(
   let wheelBuffer=0;
   let lastWheel=0;
   let touchY=0;
-  let touchBoundary:'start'|'end'|null=null;
+  let touchBoundary:'start'|'end'|'both'|null=null;
 
   const reveal=(card:HTMLElement)=>{
    card.querySelectorAll<HTMLElement>('[data-reveal]').forEach(node=>node.classList.add('is-visible'));
@@ -131,6 +131,10 @@ export default function useCardDeck(
   document.body.classList.add('card-deck-enabled');
   main.classList.add('card-deck-ready');
   cards.forEach((card,i)=>{
+   if(!card.hasAttribute('tabindex')){
+    card.tabIndex=-1;
+    card.dataset.deckTabindex='true';
+   }
    card.classList.toggle('deck-current',i===index);
    card.classList.toggle('is-illuminated',i===index);
    accessibility(card,i===index);
@@ -170,15 +174,16 @@ export default function useCardDeck(
    if(event.target.closest('.constellation-scroller'))return;
    const card=cards[index];
    touchY=event.touches[0]?.clientY??0;
-   touchBoundary=card.scrollTop<=3?'start':
-    card.scrollTop+card.clientHeight>=card.scrollHeight-3?'end':null;
+   const atStart=card.scrollTop<=3;
+   const atEnd=card.scrollTop+card.clientHeight>=card.scrollHeight-3;
+   touchBoundary=atStart&&atEnd?'both':atStart?'start':atEnd?'end':null;
   };
   const onTouchEnd=(event:TouchEvent)=>{
    if(moving||!touchBoundary||!event.changedTouches.length)return;
    const delta=touchY-event.changedTouches[0].clientY;
-   if(touchBoundary==='end'&&delta>85&&index<cards.length-1){
+   if((touchBoundary==='end'||touchBoundary==='both')&&delta>85&&index<cards.length-1){
     navigate(cards[index+1].id,false,false);
-   }else if(touchBoundary==='start'&&delta< -85&&index>0){
+   }else if((touchBoundary==='start'||touchBoundary==='both')&&delta< -85&&index>0){
     navigate(cards[index-1].id,false,false);
    }
    touchBoundary=null;
@@ -238,6 +243,10 @@ export default function useCardDeck(
    cards.forEach(card=>{
     card.inert=false;
     card.removeAttribute('aria-hidden');
+    if(card.dataset.deckTabindex){
+     card.removeAttribute('tabindex');
+     delete card.dataset.deckTabindex;
+    }
     card.classList.remove('deck-current','deck-outgoing','is-illuminated');
     card.style.removeProperty('--scene-progress');
     card.style.removeProperty('--scene-presence');
