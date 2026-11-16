@@ -20,13 +20,13 @@ try {
   ['does he have production AI experience','Ovation Virtual Advisor'],
   ['what measurable impact has he delivered','15%'],
   ['is he a good fit for this role','job description'],
-  ['where is his resume','not linked'],
+  ['where is his resume','Resume button'],
   ['has he published research papers','does not list'],
   ['what datasets has he worked with','FaceForensics++'],
   ['what is his experience with LLM evaluation','15%'],
   ['which project best demonstrates his AI skills','computer vision'],
   ['which projects use deep learning','ResNet-50'],
-  ['can I view project code','MedPred'],
+  ['can I view project code','GitHub'],
   ['summarize his portfolio','BITS Pilani'],
   ['explain his work simply','AI systems'],
   ['are you an LLM','predefined'],
@@ -36,8 +36,9 @@ try {
   ['go to skills','#skills'],
   ['take me to projects','#projects'],
   ['what is his RAG experience','ChromaDB'],
+  ['tell me about SHL Recommendation System','FAISS'],
   ['tell me about Plantspector','ResNet-50'],
-  ['tell me about MedPred','LightGBM'],
+  ['tell me about Deepfake Detection','Xception'],
   ['how can I contact him','Contact'],
   ['what is his CGPA','8.04'],
   ['what cloud platforms does he know','Azure'],
@@ -50,7 +51,7 @@ try {
   assert.ok(actual.toLowerCase().includes(expected.toLowerCase()),`Incorrect answer to "${question}": ${actual}`);
  }
  const plant=answerPortfolioQuestion('tell me about Plantspector');
- assert.equal(plant.topic,'project:1');
+ assert.equal(plant.topic,'project:2');
  const follow=answerPortfolioQuestion('What models did he use?',plant.topic);
  assert.match(follow.text,/ResNet-50/);
  assert.match(follow.text,/EDSR/);
@@ -58,8 +59,10 @@ try {
  assert.match(answerPortfolioQuestion('What dataset did he use?',plant.topic).text,/does not name a specific dataset/);
  const deepfake=answerPortfolioQuestion('tell me about Deepfake Detection');
  assert.match(answerPortfolioQuestion('What datasets did he use?',deepfake.topic).text,/Celeb-DF/);
- const med=answerPortfolioQuestion('tell me about MedPred');
- assert.match(answerPortfolioQuestion('where is the code',med.topic).href,/github.com/);
+ const shl=answerPortfolioQuestion('tell me about SHL Recommendation System');
+ assert.equal(shl.topic,'project:0');
+ assert.match(answerPortfolioQuestion('what models did he use',shl.topic).text,/Gemini Flash/);
+ assert.match(answerPortfolioQuestion('where is the code',shl.topic).text,/does not link/);
  assert.match(answerPortfolioQuestion('where is the code',plant.topic).text,/does not link/);
  assert.equal(answerPortfolioQuestion('what models did he use').topic,undefined);
  const unknown=answerPortfolioQuestion('can you predict tomorrow\'s weather');
