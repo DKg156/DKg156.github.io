@@ -68,13 +68,19 @@ export default function App(){
      // their decorative circuits drift. No React updates or extra scroll handlers.
      if(!reduceMotion.matches){
        const viewport=window.innerHeight;
-       sections.forEach(section=>{
-         const bounds=section.getBoundingClientRect();
+       // Snapshot geometry before writing styles to avoid synchronous
+       // re-layout between cards on every animation frame.
+       const bounds=sections.map(section=>section.getBoundingClientRect());
+       sections.forEach((section,index)=>{
+         const rect=bounds[index];
          // Switch on when the section enters the reading area and keep the
          // illumination steady until it exits (no continuous pulsing).
-         section.classList.toggle('is-illuminated',bounds.top<viewport*.82&&bounds.bottom>viewport*.18);
-         if(bounds.bottom<0||bounds.top>viewport)return;
-         const phase=Math.max(0,Math.min(1,(viewport-bounds.top)/(viewport+bounds.height)));
+         const illuminated=rect.top<viewport*.82&&rect.bottom>viewport*.18;
+         if(section.classList.contains('is-illuminated')!==illuminated){
+           section.classList.toggle('is-illuminated',illuminated);
+         }
+         if(rect.bottom<0||rect.top>viewport)return;
+         const phase=Math.max(0,Math.min(1,(viewport-rect.top)/(viewport+rect.height)));
          const presence=Math.sin(Math.PI*phase);
          section.style.setProperty('--scene-progress',phase.toFixed(3));
          section.style.setProperty('--scene-presence',presence.toFixed(3));
@@ -117,22 +123,31 @@ export default function App(){
      cards.forEach(card=>card.classList.remove('flip-pending'));
    };
  },[]);
- // Internal navigation must not depend on CSS smooth-scrolling through
- // intermediate animated cards. Flip past them quickly and align the final
- // section with the header; keep regular wheel/touch scrolling untouched.
+ // Navigate directly to one section. Skipped cards are represented by
+ // a small compositor-only preview, avoiding repeated full-page paints.
  useEffect(()=>{
    const cards=Array.from(document.querySelectorAll<HTMLElement>('#main > section[id]'));
    const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
-   let stepTimer:number|undefined;
+   const preview=document.createElement('div');
+   preview.className='section-jump-preview';
+   preview.setAttribute('aria-hidden','true');
+   preview.hidden=true;
+   const previewKicker=document.createElement('span');
+   previewKicker.textContent='FLIPPING THROUGH';
+   const previewTitle=document.createElement('strong');
+   preview.append(previewKicker,previewTitle);
+   document.body.appendChild(preview);
+   let flipAnimation:Animation|undefined;
    let cleanupTimer:number|undefined;
    let version=0;
    const clearFlips=()=>{
      version++;
-     if(stepTimer!==undefined)window.clearTimeout(stepTimer);
+     flipAnimation?.cancel();
+     flipAnimation=undefined;
      if(cleanupTimer!==undefined)window.clearTimeout(cleanupTimer);
-     stepTimer=undefined;
      cleanupTimer=undefined;
-     cards.forEach(card=>card.classList.remove('jump-flip','jump-destination','jump-reset'));
+     preview.hidden=true;
+     cards.forEach(card=>card.classList.remove('jump-destination'));
    };
    const go=(id:string,addToHistory:boolean)=>{
      const destinationIndex=cards.findIndex(card=>card.id===id);
@@ -140,41 +155,49 @@ export default function App(){
      clearFlips();
      const run=version;
      let currentIndex=0;
-     for(let i=0;i<cards.length;i++){
-       if(cards[i].getBoundingClientRect().top<=window.innerHeight*.35)currentIndex=i;
+     // One geometry read for each card, only on a navigation action.
+     const positions=cards.map(card=>card.getBoundingClientRect().top);
+     for(let i=0;i<positions.length;i++){
+       if(positions[i]<=window.innerHeight*.35)currentIndex=i;
      }
-     const direction=destinationIndex>=currentIndex?1:-1;
-     const route:number[]=[];
-     if(reduceMotion.matches||destinationIndex===currentIndex){
-       route.push(destinationIndex);
-     }else{
-       for(let i=currentIndex+direction;direction>0?i<=destinationIndex:i>=destinationIndex;i+=direction)route.push(i);
-     }
-     const showStep=(index:number)=>{
-       if(run!==version)return;
-       const card=cards[route[index]];
-       const last=index===route.length-1;
-       // Cancel the ordinary entry transition before positioning this card.
-       card.classList.add('jump-reset');
-       card.classList.remove('flip-pending','jump-flip','jump-destination');
-       card.querySelectorAll<HTMLElement>('[data-reveal]').forEach(node=>node.classList.add('is-visible'));
-       void card.offsetHeight;
-       card.scrollIntoView({behavior:'instant',block:'start'});
-       card.classList.remove('jump-reset');
-       if(!reduceMotion.matches)card.classList.add(last?'jump-destination':'jump-flip');
-       if(last){
-         if(addToHistory&&window.location.hash!=='#'+id)window.history.pushState(null,'','#'+id);
-         setActive(id);
-         if(!card.hasAttribute('tabindex'))card.tabIndex=-1;
-         card.focus({preventScroll:true});
-         cleanupTimer=window.setTimeout(()=>{
-           if(run===version)cards.forEach(item=>item.classList.remove('jump-flip','jump-destination'));
-         },340);
-       }else{
-         stepTimer=window.setTimeout(()=>showStep(index+1),115);
+     const direction=destinationIndex>currentIndex?1:-1;
+     const steps:number[]=[];
+     if(!reduceMotion.matches){
+       for(let i=currentIndex+direction;direction>0?i<destinationIndex:i>destinationIndex;i+=direction){
+         steps.push(i);
        }
+     }
+     const land=()=>{
+       if(run!==version)return;
+       preview.hidden=true;
+       const destination=cards[destinationIndex];
+       destination.classList.remove('flip-pending');
+       destination.querySelectorAll<HTMLElement>('[data-reveal]').forEach(node=>node.classList.add('is-visible'));
+       // Scroll once instead of repeatedly scrolling whole sections.
+       destination.scrollIntoView({behavior:'instant',block:'start'});
+       if(!reduceMotion.matches)destination.classList.add('jump-destination');
+       if(addToHistory&&window.location.hash!=='#'+id)window.history.pushState(null,'','#'+id);
+       setActive(id);
+       if(!destination.hasAttribute('tabindex'))destination.tabIndex=-1;
+       destination.focus({preventScroll:true});
+       cleanupTimer=window.setTimeout(()=>{
+         if(run===version)destination.classList.remove('jump-destination');
+       },300);
      };
-     showStep(0);
+     const flip=(index:number)=>{
+       if(run!==version)return;
+       if(index>=steps.length){land();return;}
+       previewTitle.textContent=nav.find(label=>label.toLowerCase()===cards[steps[index]].id)||cards[steps[index]].id;
+       preview.hidden=false;
+       flipAnimation=preview.animate([
+         {opacity:0,transform:'perspective(800px) translateY(10px) rotateX(-15deg)'},
+         {opacity:1,transform:'perspective(800px) translateY(0) rotateX(0deg)'},
+         {opacity:0,transform:'perspective(800px) translateY(-8px) rotateX(12deg)'}
+       ],{duration:110,easing:'ease-in-out'});
+       flipAnimation.onfinish=()=>flip(index+1);
+     };
+     if(steps.length)flip(0);
+     else land();
    };
    navigateSectionRef.current=id=>go(id,true);
    const onClick=(event:MouseEvent)=>{
@@ -191,7 +214,7 @@ export default function App(){
      const id=decodeURIComponent(window.location.hash.slice(1));
      if(cards.some(card=>card.id===id))go(id,false);
    };
-   const onUserScroll=()=>{if(stepTimer!==undefined)clearFlips();};
+   const onUserScroll=()=>{if(flipAnimation)clearFlips();};
    document.addEventListener('click',onClick);
    window.addEventListener('popstate',onLocationChange);
    window.addEventListener('hashchange',onLocationChange);
@@ -199,6 +222,7 @@ export default function App(){
    window.addEventListener('touchstart',onUserScroll,{passive:true});
    return ()=>{
      clearFlips();
+     preview.remove();
      navigateSectionRef.current=()=>{};
      document.removeEventListener('click',onClick);
      window.removeEventListener('popstate',onLocationChange);
