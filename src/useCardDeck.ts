@@ -69,7 +69,7 @@ export default function useCardDeck(
     const advance=(index:number)=>{
      if(token!==journeyToken)return;
      const from=window.scrollY,to=stops[index];
-     const duration=Math.min(540,Math.max(250,220+Math.abs(from-to)*.1));
+     const duration=Math.min(210,Math.max(130,110+Math.abs(from-to)*.025));
      const begun=window.performance.now();
      const tick=(now:number)=>{
       if(token!==journeyToken)return;
@@ -299,7 +299,7 @@ export default function useCardDeck(
     const from=window.scrollY;
     const to=stops[index];
     const distance=Math.abs(from-to);
-    const duration=Math.min(650,Math.max(280,240+distance*.12));
+    const duration=Math.min(210,Math.max(130,110+distance*.025));
     const start=window.performance.now();
     const tick=(now:number)=>{
      if(token!==journeyToken)return;
