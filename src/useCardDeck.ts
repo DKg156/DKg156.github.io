@@ -54,33 +54,75 @@ export default function useCardDeck(
    }
   });
   main.classList.add('scroll-stack-ready');
+  const flipping=new Set<HTMLElement>();
+  const clearFlip=(card:HTMLElement)=>{
+   if(!flipping.has(card))return;
+   card.style.removeProperty('transform');
+   card.style.removeProperty('opacity');
+   card.classList.remove('card-scroll-flipping');
+   flipping.delete(card);
+  };
+  const clearAllFlips=()=>{for(const card of Array.from(flipping))clearFlip(card);};
   const update=()=>{
    raf=0;
    const viewport=window.innerHeight;
    const total=document.documentElement.scrollHeight-viewport;
    if(progressRef.current){
     progressRef.current.style.transform='scaleX('+(
-      total>0?Math.min(1,Math.max(0,window.scrollY/total)):0
+     total>0?Math.min(1,Math.max(0,window.scrollY/total)):0
     )+')';
    }
-   // Batch reads before writes; only visible sections receive decoration work.
+   // Stable flow markers are not transformed or sticky. Read geometry first,
+   // then write transforms so each scroll frame needs no forced layout.
+   const markerY=markers.map(marker=>marker.getBoundingClientRect().top);
    const rects=cards.map(card=>card.getBoundingClientRect());
    let visibleIndex=0;
-   rects.forEach((rect,i)=>{
-    if(rect.top<viewport*.55 && rect.bottom>viewport*.18)visibleIndex=i;
+   markerY.forEach((y,i)=>{if(y<=viewport*.55)visibleIndex=i;});
+   // Each marker sits exactly after the preceding card in document flow.
+   // Wait until its end has moved into the lower reading area before
+   // starting any flip. This is not an artificial wheel/scroll buffer.
+   const start=viewport*.78;
+   const finish=viewport*.43;
+   cards.forEach((card,i)=>{
+    const rect=rects[i];
+    const visible=rect.bottom>0&&rect.top<viewport;
+    const lit=visible&&i===visibleIndex;
+    if(card.classList.contains('is-illuminated')!==lit){
+     card.classList.toggle('is-illuminated',lit);
+    }
+    if(visible&&!motion.matches){
+     const phase=Math.max(0,Math.min(1,(viewport-rect.top)/(viewport+rect.height)));
+     card.style.setProperty('--scene-progress',phase.toFixed(3));
+     card.style.setProperty('--scene-presence',Math.sin(Math.PI*phase).toFixed(3));
+     card.style.setProperty('--scene-drift',((phase-.5)*24).toFixed(1)+'px');
+    }
+    // The same rotateX(±19deg) card turn used by navigation is now
+    // driven continuously by the user's scroll, in either direction.
+    // Sections outside the short transition band have no transform.
+    if(i===0||motion.matches||navigating){
+     clearFlip(card);
+     return;
+    }
+    const y=markerY[i];
+    // Before this threshold, the full preceding card remains readable.
+    // No transform or faded tile exists ahead of the transition.
+    if(y>=start||y<=finish){
+     clearFlip(card);
+     return;
+    }
+    const progress=Math.max(0,Math.min(1,(start-y)/(start-finish)));
+    // Starts and ends flat. The shallow vertical pitch happens between
+    // those points, eliminating the sudden first-frame rotation.
+    // The same geometry is used by direct section navigation.
+    const turn=Math.sin(Math.PI*progress);
+    card.style.transform='perspective(1500px) rotateX('+(-19*turn).toFixed(2)+'deg) translateY('+(22*turn).toFixed(2)+'px)';
+    card.style.opacity=(1-.25*turn).toFixed(3);
+    if(!flipping.has(card)){
+     flipping.add(card);
+     card.classList.add('card-scroll-flipping');
+    }
    });
-   rects.forEach((rect,i)=>{
-    const card=cards[i];
-    const visible=rect.bottom>0 && rect.top<viewport;
-    const lit=visible && i===visibleIndex;
-    if(card.classList.contains('is-illuminated')!==lit)card.classList.toggle('is-illuminated',lit);
-    if(!visible||motion.matches)return;
-    const phase=Math.max(0,Math.min(1,(viewport-rect.top)/(viewport+rect.height)));
-    card.style.setProperty('--scene-progress',phase.toFixed(3));
-    card.style.setProperty('--scene-presence',Math.sin(Math.PI*phase).toFixed(3));
-    card.style.setProperty('--scene-drift',((phase-.5)*24).toFixed(1)+'px');
-   });
-   if(!navigating && visibleIndex!==activeIndex){
+   if(!navigating&&visibleIndex!==activeIndex){
     activeIndex=visibleIndex;
     setActive(cards[visibleIndex].id);
    }
@@ -89,22 +131,6 @@ export default function useCardDeck(
   window.addEventListener('scroll',queue,{passive:true});
   window.addEventListener('resize',queue);
 
-  // A full-sized entering card gently pitches around its HORIZONTAL edge.
-  // The element and its real content animate; there is no text preview.
-  const entryObserver=('IntersectionObserver' in window)?
-   new IntersectionObserver(entries=>{
-    for(const entry of entries){
-     if(!entry.isIntersecting || navigating)continue;
-     const card=entry.target as HTMLElement;
-     entryObserver?.unobserve(card);
-     if(card===cards[0]||motion.matches)continue;
-     card.animate([
-      {opacity:.78,transform:'perspective(1500px) rotateX(-13deg) translateY(18px)'},
-      {opacity:1,transform:'perspective(1500px) rotateX(0deg) translateY(0)'}
-     ],{duration:370,easing:'cubic-bezier(.2,.78,.2,1)'});
-    }
-   },{rootMargin:'0px 0px -12% 0px',threshold:0}):null;
-  cards.slice(1).forEach(card=>entryObserver?.observe(card));
   const locate=(i:number)=>{
    const marker=markers[i];
    return Math.max(0,window.scrollY+marker.getBoundingClientRect().top
@@ -115,6 +141,7 @@ export default function useCardDeck(
    currentAnimation?.cancel();
    currentAnimation=null;
    navigating=false;
+   clearAllFlips();
   };
   const go=(id:string,saveHistory:boolean,focus:boolean,instant=false)=>{
    const targetIndex=cards.findIndex(card=>card.id===id);
@@ -122,42 +149,29 @@ export default function useCardDeck(
    interrupt();
    const token=navigationToken;
    const direction=targetIndex>=activeIndex?1:-1;
-   const steps:number[]=[];
-   if(instant||motion.matches||targetIndex===activeIndex){
-    steps.push(targetIndex);
-   }else{
-    for(let i=activeIndex+direction;direction>0?i<=targetIndex:i>=targetIndex;i+=direction){
-     steps.push(i);
-    }
-   }
+   const card=cards[targetIndex];
    navigating=true;
+   reveal(card);
+   // One direct jump to the requested section. Intervening sections are
+   // never animated, scrolled through, or displayed as placeholders.
+   window.scrollTo({top:locate(targetIndex),behavior:'instant'});
    void (async()=>{
-    for(let n=0;n<steps.length;n++){
-     if(token!==navigationToken)return;
-     const step=steps[n];
-     const card=cards[step];
-     reveal(card);
-     // This is an instantaneous position change, not a smooth-page scroll.
-     // The real section panel performs the visible vertical card turn.
-     window.scrollTo({top:locate(step),behavior:'instant'});
-     if(!instant&&!motion.matches && 'animate' in card){
-      const last=n===steps.length-1;
-      currentAnimation=card.animate([
-       {opacity:.52,transform:'perspective(1500px) rotateX('+(direction>0?-19:19)+'deg) translateY('+(direction>0?22:-22)+'px)'},
-       {opacity:1,transform:'perspective(1500px) rotateX(0deg) translateY(0)'}
-      ],{duration:last?310:115,easing:'cubic-bezier(.16,.7,.2,1)'});
-      await currentAnimation.finished.catch(()=>{});
-      currentAnimation=null;
-     }
+    if(!instant&&!motion.matches&&'animate' in card){
+     currentAnimation=card.animate([
+      {opacity:.75,transform:'perspective(1500px) rotateX('+(direction>0?-19:19)+'deg) translateY('+(direction>0?22:-22)+'px)'},
+      {opacity:1,transform:'perspective(1500px) rotateX(0deg) translateY(0)'}
+     ],{duration:310,easing:'cubic-bezier(.16,.7,.2,1)'});
+     await currentAnimation.finished.catch(()=>{});
+     currentAnimation=null;
     }
     if(token!==navigationToken)return;
     navigating=false;
     activeIndex=targetIndex;
     setActive(id);
-    if(saveHistory && window.location.hash!=='#'+id){
+    if(saveHistory&&window.location.hash!=='#'+id){
      window.history.pushState(null,'','#'+id);
     }
-    if(focus)cards[targetIndex].focus({preventScroll:true});
+    if(focus)card.focus({preventScroll:true});
     queue();
    })();
   };
@@ -193,7 +207,6 @@ export default function useCardDeck(
   return ()=>{
    interrupt();
    sizes?.disconnect();
-   entryObserver?.disconnect();
    if(raf)window.cancelAnimationFrame(raf);
    navigateSectionRef.current=()=>{};
    document.removeEventListener('click',onClick);
