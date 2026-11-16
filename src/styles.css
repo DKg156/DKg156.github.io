@@ -813,6 +813,9 @@ main > section:nth-of-type(4){z-index:4}
 main > section:nth-of-type(5){z-index:5}
 main > section:nth-of-type(6){z-index:6}
 main > section:nth-of-type(7){z-index:7}
+/* Reverse traversal brings the previous actual card over the next one.
+   It retains its full sticky height and exposes the previously hidden end. */
+main.scroll-stack-ready > section.card-returning{z-index:20}
 .card-flow-anchor{
  display:block;
  position:relative;
@@ -837,4 +840,35 @@ main > section:nth-of-type(7){z-index:7}
 }
 @media print{
  main.scroll-stack-ready > section{position:relative;top:auto;min-height:0}
+}
+
+
+/* Phones, tablets, and touch-first devices keep the original simple page
+   sections. The desktop sticky deck and 3D card effects do not run here. */
+@media (max-width:1024px), (pointer:coarse), (hover:none){
+ main > section,
+ main.scroll-stack-ready > section{
+  position:relative;
+  top:auto;
+  min-height:auto;
+  margin:0;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  opacity:1;
+  transform:none;
+  scroll-margin-top:70px;
+ }
+ main > .hero,
+ main.scroll-stack-ready > .hero{
+  min-height:auto;
+ }
+ main > section:nth-of-type(n),
+ main.scroll-stack-ready > section.card-returning{
+  z-index:auto;
+ }
+ main.scroll-stack-ready > section.card-scroll-flipping{
+  backface-visibility:visible;
+  will-change:auto;
+ }
 }

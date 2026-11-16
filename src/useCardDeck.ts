@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import {useEffect,useState} from 'react';
 
 /**
  * Section cards use the ordinary document scroll, retaining their natural
@@ -11,11 +11,71 @@ export default function useCardDeck(
   progressRef:{current:HTMLDivElement|null},
   navigateSectionRef:{current:(id:string)=>void}
 ){
+ // Keep the card experience on desktop browsers only. Touch-first devices
+ // and tablet-size viewports get standard full-document scrolling.
+ const plainScrollQuery='(max-width: 1024px), (pointer: coarse), (hover: none)';
+ const [plainScroll,setPlainScroll]=useState(
+  ()=>typeof window!=='undefined'&&window.matchMedia(plainScrollQuery).matches
+ );
+ useEffect(()=>{
+  const query=window.matchMedia(plainScrollQuery);
+  const onChange=()=>setPlainScroll(query.matches);
+  onChange();
+  query.addEventListener('change',onChange);
+  return ()=>query.removeEventListener('change',onChange);
+ },[]);
  useEffect(()=>{
   const main=document.querySelector<HTMLElement>('#main');
   if(!main)return;
   const cards=Array.from(main.querySelectorAll<HTMLElement>(':scope > section[id]'));
   if(!cards.length)return;
+  // No markers, sticky measurements, scroll transforms, or wheel interception
+  // on mobile/tablet. The original section anchors stay in document flow.
+  if(plainScroll){
+   const go=(id:string)=>{
+    const target=cards.find(card=>card.id===id);
+    if(!target)return;
+    if(window.location.hash!=='#'+id){
+     window.history.pushState(null,'','#'+id);
+    }
+    setActive(id);
+    target.scrollIntoView({
+     behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',
+     block:'start'
+    });
+   };
+   navigateSectionRef.current=go;
+   const observer=('IntersectionObserver' in window)
+    ?new IntersectionObserver(entries=>{
+      for(const entry of entries){
+       if(entry.isIntersecting)setActive(entry.target.id);
+      }
+     },{rootMargin:'-20% 0px -62% 0px',threshold:0})
+    :null;
+   cards.forEach(card=>observer?.observe(card));
+   let progressFrame=0;
+   const updateProgress=()=>{
+    progressFrame=0;
+    const range=document.documentElement.scrollHeight-window.innerHeight;
+    const fraction=range>0?Math.min(1,Math.max(0,window.scrollY/range)):0;
+    if(progressRef.current){
+     progressRef.current.style.transform='scaleX('+fraction+')';
+    }
+   };
+   const queueProgress=()=>{
+    if(!progressFrame)progressFrame=window.requestAnimationFrame(updateProgress);
+   };
+   window.addEventListener('scroll',queueProgress,{passive:true});
+   window.addEventListener('resize',queueProgress);
+   queueProgress();
+   return ()=>{
+    observer?.disconnect();
+    window.removeEventListener('scroll',queueProgress);
+    window.removeEventListener('resize',queueProgress);
+    if(progressFrame)window.cancelAnimationFrame(progressFrame);
+    navigateSectionRef.current=()=>{};
+   };
+  }
   const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
   let raf=0;
   let activeIndex=0;
@@ -54,6 +114,18 @@ export default function useCardDeck(
    }
   });
   main.classList.add('scroll-stack-ready');
+  // Remember scroll direction so the returning card can come ABOVE the
+  // newer section during reverse scrolling. CSS source order alone cannot
+  // uncover a previous sticky card's final paragraphs.
+  let lastScrollY=window.scrollY;
+  let upward=false;
+  let returningIndex=-1;
+  const setReturning=(index:number)=>{
+   if(returningIndex===index)return;
+   if(returningIndex>=0)cards[returningIndex].classList.remove('card-returning');
+   returningIndex=index;
+   if(index>=0)cards[index].classList.add('card-returning');
+  };
   const flipping=new Set<HTMLElement>();
   const clearFlip=(card:HTMLElement)=>{
    if(!flipping.has(card))return;
@@ -74,15 +146,22 @@ export default function useCardDeck(
    }
    // Stable flow markers are not transformed or sticky. Read geometry first,
    // then write transforms so each scroll frame needs no forced layout.
+   const currentScroll=window.scrollY;
+   if(Math.abs(currentScroll-lastScrollY)>0.5)upward=currentScroll<lastScrollY;
+   lastScrollY=currentScroll;
    const markerY=markers.map(marker=>marker.getBoundingClientRect().top);
    const rects=cards.map(card=>card.getBoundingClientRect());
-   let visibleIndex=0;
-   markerY.forEach((y,i)=>{if(y<=viewport*.55)visibleIndex=i;});
-   // Each marker sits exactly after the preceding card in document flow.
-   // Wait until its end has moved into the lower reading area before
-   // starting any flip. This is not an artificial wheel/scroll buffer.
+   // The next card must have physically entered the reading area before a
+   // reverse card comes forward. A higher z-index then exposes its bottom
+   // paragraphs instead of leaving them buried under newer sticky cards.
    const start=viewport*.78;
    const finish=viewport*.43;
+   const returningBoundary=upward&&!navigating
+    ?markerY.findIndex((y,i)=>i>0&&y>=finish)
+    :-1;
+   setReturning(returningBoundary>0?returningBoundary-1:-1);
+   let visibleIndex=0;
+   markerY.forEach((y,i)=>{if(y<=viewport*(upward?.78:.55))visibleIndex=i;});
    cards.forEach((card,i)=>{
     const rect=rects[i];
     const visible=rect.bottom>0&&rect.top<viewport;
@@ -99,24 +178,42 @@ export default function useCardDeck(
     // The same rotateX(±19deg) card turn used by navigation is now
     // driven continuously by the user's scroll, in either direction.
     // Sections outside the short transition band have no transform.
-    if(i===0||motion.matches||navigating){
+    if(motion.matches||navigating){
      clearFlip(card);
      return;
     }
-    const y=markerY[i];
-    // Before this threshold, the full preceding card remains readable.
-    // No transform or faded tile exists ahead of the transition.
-    if(y>=start||y<=finish){
-     clearFlip(card);
-     return;
+    // Reversing: return the PREVIOUS real card above the later card, with
+    // a small vertical flip-in. Once fully returned it stays above, so its
+    // bottom content remains accessible instead of being overlapped.
+    if(upward){
+     const boundaryY=markerY[i+1];
+     if(i!==returningIndex||boundaryY===undefined||
+        boundaryY<=finish||boundaryY>=start){
+      clearFlip(card);
+      return;
+     }
+     const progress=(boundaryY-finish)/(start-finish);
+     const eased=progress*progress*(3-2*progress);
+     const remaining=1-eased;
+     card.style.transform='perspective(1500px) rotateX('+(16*remaining).toFixed(2)+'deg) translateY('+(-16*remaining).toFixed(2)+'px)';
+     card.style.opacity=(.2+.8*eased).toFixed(3);
+    }else{
+     // Forward: keep the existing scroll-linked vertical flip. Earlier
+     // sections remain in their natural order until the new one arrives.
+     if(i===0){
+      clearFlip(card);
+      return;
+     }
+     const y=markerY[i];
+     if(y>=start||y<=finish){
+      clearFlip(card);
+      return;
+     }
+     const progress=(start-y)/(start-finish);
+     const turn=Math.sin(Math.PI*progress);
+     card.style.transform='perspective(1500px) rotateX('+(-19*turn).toFixed(2)+'deg) translateY('+(22*turn).toFixed(2)+'px)';
+     card.style.opacity=(1-.25*turn).toFixed(3);
     }
-    const progress=Math.max(0,Math.min(1,(start-y)/(start-finish)));
-    // Starts and ends flat. The shallow vertical pitch happens between
-    // those points, eliminating the sudden first-frame rotation.
-    // The same geometry is used by direct section navigation.
-    const turn=Math.sin(Math.PI*progress);
-    card.style.transform='perspective(1500px) rotateX('+(-19*turn).toFixed(2)+'deg) translateY('+(22*turn).toFixed(2)+'px)';
-    card.style.opacity=(1-.25*turn).toFixed(3);
     if(!flipping.has(card)){
      flipping.add(card);
      card.classList.add('card-scroll-flipping');
@@ -142,6 +239,7 @@ export default function useCardDeck(
    currentAnimation=null;
    navigating=false;
    clearAllFlips();
+   setReturning(-1);
   };
   const go=(id:string,saveHistory:boolean,focus:boolean,instant=false)=>{
    const targetIndex=cards.findIndex(card=>card.id===id);
@@ -217,6 +315,8 @@ export default function useCardDeck(
    window.removeEventListener('scroll',queue);
    window.removeEventListener('resize',queue);
    markers.forEach(marker=>marker.remove());
+   setReturning(-1);
+   clearAllFlips();
    cards.forEach(card=>{
     card.style.removeProperty('--stack-card-height');
     card.style.removeProperty('--scene-progress');
@@ -230,5 +330,5 @@ export default function useCardDeck(
    });
    main.classList.remove('scroll-stack-ready');
   };
- },[setActive,progressRef,navigateSectionRef]);
+ },[setActive,progressRef,navigateSectionRef,plainScroll]);
 }
