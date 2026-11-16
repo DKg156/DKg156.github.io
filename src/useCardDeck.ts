@@ -130,7 +130,6 @@ export default function useCardDeck(
   const clearFlip=(card:HTMLElement)=>{
    if(!flipping.has(card))return;
    card.style.removeProperty('transform');
-   card.style.removeProperty('opacity');
    card.classList.remove('card-scroll-flipping');
    flipping.delete(card);
   };
@@ -196,7 +195,6 @@ export default function useCardDeck(
      const eased=progress*progress*(3-2*progress);
      const remaining=1-eased;
      card.style.transform='perspective(1500px) rotateX('+(16*remaining).toFixed(2)+'deg) translateY('+(-16*remaining).toFixed(2)+'px)';
-     card.style.opacity=(.2+.8*eased).toFixed(3);
     }else{
      // Forward: keep the existing scroll-linked vertical flip. Earlier
      // sections remain in their natural order until the new one arrives.
@@ -212,7 +210,6 @@ export default function useCardDeck(
      const progress=(start-y)/(start-finish);
      const turn=Math.sin(Math.PI*progress);
      card.style.transform='perspective(1500px) rotateX('+(-19*turn).toFixed(2)+'deg) translateY('+(22*turn).toFixed(2)+'px)';
-     card.style.opacity=(1-.25*turn).toFixed(3);
     }
     if(!flipping.has(card)){
      flipping.add(card);
@@ -256,8 +253,8 @@ export default function useCardDeck(
    void (async()=>{
     if(!instant&&!motion.matches&&'animate' in card){
      currentAnimation=card.animate([
-      {opacity:.75,transform:'perspective(1500px) rotateX('+(direction>0?-19:19)+'deg) translateY('+(direction>0?22:-22)+'px)'},
-      {opacity:1,transform:'perspective(1500px) rotateX(0deg) translateY(0)'}
+      {transform:'perspective(1500px) rotateX('+(direction>0?-19:19)+'deg) translateY('+(direction>0?22:-22)+'px)'},
+      {transform:'perspective(1500px) rotateX(0deg) translateY(0)'}
      ],{duration:310,easing:'cubic-bezier(.16,.7,.2,1)'});
      await currentAnimation.finished.catch(()=>{});
      currentAnimation=null;
