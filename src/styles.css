@@ -774,44 +774,66 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
  .hero-mesh{transition:none}
 }
 
-/* Layered scroll cards: CSS handles the stacking, not a scroll-driven
-   React re-render. The existing section IDs, content and controls stay put.
-   Each card has an opaque surface so it can cover the previous card. */
-main{
- --stack-top:90px;
- --stack-edge:16px;
-}
+/* Playing-card sections with a deliberate breathing gap.
+   Scroll stays native: no sticky pile, forced snapping, or scroll locking. */
 main > section{
- margin:0 clamp(9px,1.7vw,26px) 16px;
+ margin:0 clamp(9px,1.7vw,26px) clamp(74px,9vh,112px);
  border:1px solid color-mix(in srgb,var(--accent) 20%,var(--border));
  border-radius:8px;
- box-shadow:0 -14px 48px rgba(0,0,0,.23);
+ box-shadow:0 16px 46px rgba(0,0,0,.18);
+ scroll-margin-top:90px;
 }
 main > .hero,
-main > .section:not(.section-alt):not(.contact){
- background:var(--bg);
+main > .section:not(.section-alt):not(.contact){background:var(--bg)}
+/* A short, restrained 3D card turn occurs only as the next card enters.
+   Class-based entry prevents repeated flips when scrolling back upward. */
+@media(prefers-reduced-motion:no-preference){
+ main > section{
+   transition:opacity .3s ease-out,transform .3s cubic-bezier(.2,.78,.26,1);
+   transform-origin:center top;
+   backface-visibility:hidden;
+ }
+ main > section.flip-pending{
+   opacity:.35;
+   transform:perspective(1200px) translateY(14px) rotateX(-5deg);
+ }
 }
-main.scroll-stack-ready > section{
- position:sticky;
- /* Tall sections scroll normally until their final content is visible.
-    Only then do they pin while the following card slides on top. */
- top:min(var(--stack-top),calc(100dvh - var(--stack-card-height) - var(--stack-edge)));
- scroll-margin-top:var(--stack-top);
-}
-main > section:nth-of-type(1){z-index:1}
-main > section:nth-of-type(2){z-index:2}
-main > section:nth-of-type(3){z-index:3}
-main > section:nth-of-type(4){z-index:4}
-main > section:nth-of-type(5){z-index:5}
-main > section:nth-of-type(6){z-index:6}
-main > section:nth-of-type(7){z-index:7}
-/* Ensure the footer can scroll over the final pinned contact card. */
-.footer{position:relative;z-index:8}
 @media(max-width:800px){
- main{--stack-top:78px;--stack-edge:10px}
- main > section{margin-inline:8px;margin-bottom:10px;border-radius:6px}
+ main > section{
+   margin-inline:8px;
+   margin-bottom:clamp(56px,9vh,80px);
+   border-radius:6px;
+   scroll-margin-top:80px;
+ }
 }
-@media(prefers-reduced-motion:reduce){
- /* Keep the tile styling but return to ordinary scrolling. */
- main.scroll-stack-ready > section{position:relative;top:auto}
+
+
+/* Lightweight composited preview of the skipped cards on direct navigation. */
+.section-jump-preview{
+ position:fixed;
+ top:clamp(110px,22vh,220px);
+ left:0;right:0;margin-inline:auto;
+ z-index:60;pointer-events:none;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ width:min(260px,calc(100% - 40px));
+ min-height:88px;padding:18px 24px;
+ background:var(--surface);
+ color:var(--fg);
+ border:1px solid var(--accent);
+ border-radius:8px;
+ box-shadow:0 12px 30px #0003;
+ text-align:center;
+}
+.section-jump-preview[hidden]{display:none}
+.section-jump-preview span{font-size:10px;letter-spacing:1.5px;color:var(--accent);font-weight:700}
+.section-jump-preview strong{font:600 21px 'Space Grotesk',sans-serif;margin-top:8px}
+@media(prefers-reduced-motion:no-preference){
+ main > section.jump-destination{
+   backface-visibility:hidden;
+   animation:section-jump-arrive .24s cubic-bezier(.2,.8,.25,1) both;
+ }
+ @keyframes section-jump-arrive{
+   from{opacity:.65;transform:perspective(1100px) rotateX(-5deg) translateY(9px)}
+   to{opacity:1;transform:none}
+ }
 }

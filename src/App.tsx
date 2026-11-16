@@ -29,6 +29,7 @@ export default function App(){
  const searchDialogRef=useRef<HTMLDivElement>(null);
  const filteredActions=quickActions.filter(action=>(action.label+' '+action.detail+' '+action.keywords).toLowerCase().includes(searchQuery.trim().toLowerCase()));
  const progressRef=useRef<HTMLDivElement>(null);
+ const navigateSectionRef=useRef<(id:string)=>void>(()=>{});
  useEffect(()=>{
    // Reveal individual cards with a stagger. Re-observe when the project filter changes.
    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
@@ -67,13 +68,19 @@ export default function App(){
      // their decorative circuits drift. No React updates or extra scroll handlers.
      if(!reduceMotion.matches){
        const viewport=window.innerHeight;
-       sections.forEach(section=>{
-         const bounds=section.getBoundingClientRect();
+       // Snapshot geometry before writing styles to avoid synchronous
+       // re-layout between cards on every animation frame.
+       const bounds=sections.map(section=>section.getBoundingClientRect());
+       sections.forEach((section,index)=>{
+         const rect=bounds[index];
          // Switch on when the section enters the reading area and keep the
          // illumination steady until it exits (no continuous pulsing).
-         section.classList.toggle('is-illuminated',bounds.top<viewport*.82&&bounds.bottom>viewport*.18);
-         if(bounds.bottom<0||bounds.top>viewport)return;
-         const phase=Math.max(0,Math.min(1,(viewport-bounds.top)/(viewport+bounds.height)));
+         const illuminated=rect.top<viewport*.82&&rect.bottom>viewport*.18;
+         if(section.classList.contains('is-illuminated')!==illuminated){
+           section.classList.toggle('is-illuminated',illuminated);
+         }
+         if(rect.bottom<0||rect.top>viewport)return;
+         const phase=Math.max(0,Math.min(1,(viewport-rect.top)/(viewport+rect.height)));
          const presence=Math.sin(Math.PI*phase);
          section.style.setProperty('--scene-progress',phase.toFixed(3));
          section.style.setProperty('--scene-presence',presence.toFixed(3));
@@ -91,31 +98,137 @@ export default function App(){
      if(frame)window.cancelAnimationFrame(frame);
    };
  },[]);
- // Keep stacked cards readable even when a section is taller than the viewport.
- // Its sticky offset becomes negative only after all of its content can scroll by.
- // ResizeObserver also covers project filtering, expanded skills, and font loading.
+ // Animate only the incoming card. Normal document flow keeps the previous
+ // card from stacking behind it, and the gap gives readers room to finish.
+ // The observer runs only once per card and never hijacks scrolling.
  useEffect(()=>{
-   const main=document.querySelector<HTMLElement>('#main');
-   if(!main||!('ResizeObserver' in window))return;
-   const cards=Array.from(main.querySelectorAll<HTMLElement>(':scope > section'));
-   const observer=new ResizeObserver(entries=>{
+   if(!('IntersectionObserver' in window)||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+   const cards=Array.from(document.querySelectorAll<HTMLElement>('#main > section'));
+   const observer=new IntersectionObserver(entries=>{
      for(const entry of entries){
-       const card=entry.target as HTMLElement;
-       const height=card.offsetHeight+'px';
-       if(card.style.getPropertyValue('--stack-card-height')!==height){
-         card.style.setProperty('--stack-card-height',height);
-       }
+       if(!entry.isIntersecting)continue;
+       entry.target.classList.remove('flip-pending');
+       observer.unobserve(entry.target);
      }
-   });
-   for(const card of cards){
-     card.style.setProperty('--stack-card-height',card.offsetHeight+'px');
+   },{rootMargin:'0px 0px -22% 0px',threshold:0});
+   // The landing card is visible immediately. Other cards are revealed once
+   // they reach the lower reading area, after the preceding card's buffer.
+   cards.slice(1).forEach(card=>{
+     card.classList.add('flip-pending');
      observer.observe(card);
-   }
-   main.classList.add('scroll-stack-ready');
+   });
    return ()=>{
      observer.disconnect();
-     main.classList.remove('scroll-stack-ready');
-     cards.forEach(card=>card.style.removeProperty('--stack-card-height'));
+     cards.forEach(card=>card.classList.remove('flip-pending'));
+   };
+ },[]);
+ // Navigate directly to one section. Skipped cards are represented by
+ // a small compositor-only preview, avoiding repeated full-page paints.
+ useEffect(()=>{
+   const cards=Array.from(document.querySelectorAll<HTMLElement>('#main > section[id]'));
+   const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+   const preview=document.createElement('div');
+   preview.className='section-jump-preview';
+   preview.setAttribute('aria-hidden','true');
+   preview.hidden=true;
+   const previewKicker=document.createElement('span');
+   previewKicker.textContent='FLIPPING THROUGH';
+   const previewTitle=document.createElement('strong');
+   preview.append(previewKicker,previewTitle);
+   document.body.appendChild(preview);
+   let flipAnimation:Animation|undefined;
+   let cleanupTimer:number|undefined;
+   let version=0;
+   const clearFlips=()=>{
+     version++;
+     flipAnimation?.cancel();
+     flipAnimation=undefined;
+     if(cleanupTimer!==undefined)window.clearTimeout(cleanupTimer);
+     cleanupTimer=undefined;
+     preview.hidden=true;
+     cards.forEach(card=>card.classList.remove('jump-destination'));
+   };
+   const go=(id:string,addToHistory:boolean)=>{
+     const destinationIndex=cards.findIndex(card=>card.id===id);
+     if(destinationIndex<0)return;
+     clearFlips();
+     const run=version;
+     let currentIndex=0;
+     // One geometry read for each card, only on a navigation action.
+     const positions=cards.map(card=>card.getBoundingClientRect().top);
+     for(let i=0;i<positions.length;i++){
+       if(positions[i]<=window.innerHeight*.35)currentIndex=i;
+     }
+     const direction=destinationIndex>currentIndex?1:-1;
+     const steps:number[]=[];
+     if(!reduceMotion.matches){
+       for(let i=currentIndex+direction;direction>0?i<destinationIndex:i>destinationIndex;i+=direction){
+         steps.push(i);
+       }
+     }
+     const land=()=>{
+       if(run!==version)return;
+       preview.hidden=true;
+       const destination=cards[destinationIndex];
+       destination.classList.remove('flip-pending');
+       destination.querySelectorAll<HTMLElement>('[data-reveal]').forEach(node=>node.classList.add('is-visible'));
+       // Scroll once instead of repeatedly scrolling whole sections.
+       destination.scrollIntoView({behavior:'instant',block:'start'});
+       if(!reduceMotion.matches)destination.classList.add('jump-destination');
+       if(addToHistory&&window.location.hash!=='#'+id)window.history.pushState(null,'','#'+id);
+       setActive(id);
+       if(!destination.hasAttribute('tabindex'))destination.tabIndex=-1;
+       destination.focus({preventScroll:true});
+       cleanupTimer=window.setTimeout(()=>{
+         if(run===version)destination.classList.remove('jump-destination');
+       },300);
+     };
+     const flip=(index:number)=>{
+       if(run!==version)return;
+       if(index>=steps.length){land();return;}
+       previewTitle.textContent=nav.find(label=>label.toLowerCase()===cards[steps[index]].id)||cards[steps[index]].id;
+       preview.hidden=false;
+       flipAnimation=preview.animate([
+         {opacity:0,transform:'perspective(800px) translateY(10px) rotateX(-15deg)'},
+         {opacity:1,transform:'perspective(800px) translateY(0) rotateX(0deg)'},
+         {opacity:0,transform:'perspective(800px) translateY(-8px) rotateX(12deg)'}
+       ],{duration:110,easing:'ease-in-out'});
+       flipAnimation.onfinish=()=>flip(index+1);
+     };
+     if(steps.length)flip(0);
+     else land();
+   };
+   navigateSectionRef.current=id=>go(id,true);
+   const onClick=(event:MouseEvent)=>{
+     if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+     if(!(event.target instanceof Element))return;
+     const anchor=event.target.closest<HTMLAnchorElement>('a[href^="#"]');
+     if(!anchor||anchor.hasAttribute('download')||(anchor.target&&anchor.target!=='_self'))return;
+     const id=decodeURIComponent(anchor.hash.slice(1));
+     if(!cards.some(card=>card.id===id))return;
+     event.preventDefault();
+     go(id,true);
+   };
+   const onLocationChange=()=>{
+     const id=decodeURIComponent(window.location.hash.slice(1));
+     if(cards.some(card=>card.id===id))go(id,false);
+   };
+   const onUserScroll=()=>{if(flipAnimation)clearFlips();};
+   document.addEventListener('click',onClick);
+   window.addEventListener('popstate',onLocationChange);
+   window.addEventListener('hashchange',onLocationChange);
+   window.addEventListener('wheel',onUserScroll,{passive:true});
+   window.addEventListener('touchstart',onUserScroll,{passive:true});
+   return ()=>{
+     clearFlips();
+     preview.remove();
+     navigateSectionRef.current=()=>{};
+     document.removeEventListener('click',onClick);
+     window.removeEventListener('popstate',onLocationChange);
+     window.removeEventListener('hashchange',onLocationChange);
+     window.removeEventListener('wheel',onUserScroll);
+     window.removeEventListener('touchstart',onUserScroll);
    };
  },[]);
  useEffect(()=>{const saved=localStorage.getItem('dhruv-theme');if(saved==='light'||saved==='dark')setTheme(saved);},[]);
@@ -149,7 +262,7 @@ export default function App(){
    setSearchOpen(false);
    setMenu(false);
    if(external){if(href.startsWith('mailto:'))window.location.href=href;else window.open(href,'_blank','noopener,noreferrer');}
-   else {window.location.hash=href;}
+   else {window.requestAnimationFrame(()=>navigateSectionRef.current(href.slice(1)));}
  }
  function onSearchKeyDown(event:React.KeyboardEvent<HTMLDivElement>){
    if(event.key==='ArrowDown'){event.preventDefault();setSearchIndex(i=>(i+1)%Math.max(filteredActions.length,1));}
