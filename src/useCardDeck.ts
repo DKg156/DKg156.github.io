@@ -25,6 +25,7 @@ export default function useCardDeck(
   let frame=0;
   let wheelBuffer=0;
   let lastWheel=0;
+  let lastReadingScroll=0;
   let touchY=0;
   let touchBoundary:'start'|'end'|'both'|null=null;
 
@@ -145,7 +146,11 @@ export default function useCardDeck(
   queueProgress();
 
   const onScroll=(event:Event)=>{
-   if(event.target===cards[index]){wheelBuffer=0;queueProgress();}
+   if(event.target===cards[index]){
+    lastReadingScroll=window.performance.now();
+    wheelBuffer=0;
+    queueProgress();
+   }
   };
   const onWheel=(event:WheelEvent)=>{
    if(event.ctrlKey||!(event.target instanceof Element))return;
@@ -160,6 +165,9 @@ export default function useCardDeck(
    event.preventDefault();
    if(moving)return;
    const now=window.performance.now();
+   // Ignore the inertial tail of the gesture that just finished reading.
+   // A deliberate extra gesture after a short pause turns the card.
+   if(now-lastReadingScroll<260){wheelBuffer=0;return;}
    if(now-lastWheel>650)wheelBuffer=0;
    lastWheel=now;
    const unit=event.deltaMode===1?16:event.deltaMode===2?card.clientHeight:1;
@@ -191,7 +199,7 @@ export default function useCardDeck(
   const onKeyDown=(event:KeyboardEvent)=>{
    if(event.defaultPrevented||event.altKey||event.metaKey||event.ctrlKey||event.shiftKey)return;
    if(!(event.target instanceof Element))return;
-   if(event.target.closest('input,textarea,select,button,a,[contenteditable="true"],.constellation-scroller'))return;
+   if(event.target.closest('input,textarea,select,button,a,summary,[role="button"],[contenteditable="true"],.constellation-scroller'))return;
    const forward=event.key==='PageDown'||event.key==='ArrowDown'||event.key===' ';
    const back=event.key==='PageUp'||event.key==='ArrowUp';
    if(!forward&&!back)return;
@@ -202,6 +210,12 @@ export default function useCardDeck(
    }else if(back&&card.scrollTop<=3&&index>0){
     event.preventDefault();
     if(!moving)navigate(cards[index-1].id,false,false);
+   }else{
+    // Body scrolling is locked in deck mode, so explicitly scroll the
+    // current card for keyboard users who are reading a long section.
+    event.preventDefault();
+    const amount=event.key.startsWith('Arrow')?72:card.clientHeight*.75;
+    card.scrollBy({top:(forward?1:-1)*amount,behavior:motion.matches?'instant':'smooth'});
    }
   };
   const onClick=(event:MouseEvent)=>{
