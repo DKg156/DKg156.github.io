@@ -773,3 +773,45 @@ body{background:var(--bg);color:var(--fg);transition:background .25s,color .25s}
 @media(prefers-reduced-motion:reduce){
  .hero-mesh{transition:none}
 }
+
+/* Layered scroll cards: CSS handles the stacking, not a scroll-driven
+   React re-render. The existing section IDs, content and controls stay put.
+   Each card has an opaque surface so it can cover the previous card. */
+main{
+ --stack-top:90px;
+ --stack-edge:16px;
+}
+main > section{
+ margin:0 clamp(9px,1.7vw,26px) 16px;
+ border:1px solid color-mix(in srgb,var(--accent) 20%,var(--border));
+ border-radius:8px;
+ box-shadow:0 -14px 48px rgba(0,0,0,.23);
+}
+main > .hero,
+main > .section:not(.section-alt):not(.contact){
+ background:var(--bg);
+}
+main.scroll-stack-ready > section{
+ position:sticky;
+ /* Tall sections scroll normally until their final content is visible.
+    Only then do they pin while the following card slides on top. */
+ top:min(var(--stack-top),calc(100dvh - var(--stack-card-height) - var(--stack-edge)));
+ scroll-margin-top:var(--stack-top);
+}
+main > section:nth-of-type(1){z-index:1}
+main > section:nth-of-type(2){z-index:2}
+main > section:nth-of-type(3){z-index:3}
+main > section:nth-of-type(4){z-index:4}
+main > section:nth-of-type(5){z-index:5}
+main > section:nth-of-type(6){z-index:6}
+main > section:nth-of-type(7){z-index:7}
+/* Ensure the footer can scroll over the final pinned contact card. */
+.footer{position:relative;z-index:8}
+@media(max-width:800px){
+ main{--stack-top:78px;--stack-edge:10px}
+ main > section{margin-inline:8px;margin-bottom:10px;border-radius:6px}
+}
+@media(prefers-reduced-motion:reduce){
+ /* Keep the tile styling but return to ordinary scrolling. */
+ main.scroll-stack-ready > section{position:relative;top:auto}
+}

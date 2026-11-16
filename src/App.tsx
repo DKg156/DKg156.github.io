@@ -91,6 +91,33 @@ export default function App(){
      if(frame)window.cancelAnimationFrame(frame);
    };
  },[]);
+ // Keep stacked cards readable even when a section is taller than the viewport.
+ // Its sticky offset becomes negative only after all of its content can scroll by.
+ // ResizeObserver also covers project filtering, expanded skills, and font loading.
+ useEffect(()=>{
+   const main=document.querySelector<HTMLElement>('#main');
+   if(!main||!('ResizeObserver' in window))return;
+   const cards=Array.from(main.querySelectorAll<HTMLElement>(':scope > section'));
+   const observer=new ResizeObserver(entries=>{
+     for(const entry of entries){
+       const card=entry.target as HTMLElement;
+       const height=card.offsetHeight+'px';
+       if(card.style.getPropertyValue('--stack-card-height')!==height){
+         card.style.setProperty('--stack-card-height',height);
+       }
+     }
+   });
+   for(const card of cards){
+     card.style.setProperty('--stack-card-height',card.offsetHeight+'px');
+     observer.observe(card);
+   }
+   main.classList.add('scroll-stack-ready');
+   return ()=>{
+     observer.disconnect();
+     main.classList.remove('scroll-stack-ready');
+     cards.forEach(card=>card.style.removeProperty('--stack-card-height'));
+   };
+ },[]);
  useEffect(()=>{const saved=localStorage.getItem('dhruv-theme');if(saved==='light'||saved==='dark')setTheme(saved);},[]);
  useEffect(()=>{document.documentElement.dataset.theme=theme;localStorage.setItem('dhruv-theme',theme);},[theme]);
  useEffect(()=>{
