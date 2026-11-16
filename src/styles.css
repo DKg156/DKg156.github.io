@@ -806,3 +806,28 @@ main > .section:not(.section-alt):not(.contact){background:var(--bg)}
    scroll-margin-top:80px;
  }
 }
+
+
+/* Quick direct links: step through skipped cards without a long smooth scroll.
+   The destination uses a slightly longer settle-in than intermediary cards. */
+@media(prefers-reduced-motion:no-preference){
+ main > section.jump-reset{
+   transition:none!important;
+   animation:none!important;
+   opacity:1;
+   transform:none;
+ }
+ main > section.jump-flip,
+ main > section.jump-destination{
+   transition:none!important;
+   backface-visibility:hidden;
+   animation:section-jump-flip .115s cubic-bezier(.2,.8,.25,1) both;
+ }
+ main > section.jump-destination{
+   animation-duration:.29s;
+ }
+ @keyframes section-jump-flip{
+   from{opacity:.58;transform:perspective(1100px) rotateY(-12deg) translateY(10px)}
+   to{opacity:1;transform:perspective(1100px) rotateY(0deg) translateY(0)}
+ }
+}
