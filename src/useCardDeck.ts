@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import {useEffect,useState} from 'react';
 
 /**
  * Section cards use the ordinary document scroll, retaining their natural
@@ -11,11 +11,71 @@ export default function useCardDeck(
   progressRef:{current:HTMLDivElement|null},
   navigateSectionRef:{current:(id:string)=>void}
 ){
+ // Keep the card experience on desktop browsers only. Touch-first devices
+ // and tablet-size viewports get standard full-document scrolling.
+ const plainScrollQuery='(max-width: 1024px), (pointer: coarse), (hover: none)';
+ const [plainScroll,setPlainScroll]=useState(
+  ()=>typeof window!=='undefined'&&window.matchMedia(plainScrollQuery).matches
+ );
+ useEffect(()=>{
+  const query=window.matchMedia(plainScrollQuery);
+  const onChange=()=>setPlainScroll(query.matches);
+  onChange();
+  query.addEventListener('change',onChange);
+  return ()=>query.removeEventListener('change',onChange);
+ },[]);
  useEffect(()=>{
   const main=document.querySelector<HTMLElement>('#main');
   if(!main)return;
   const cards=Array.from(main.querySelectorAll<HTMLElement>(':scope > section[id]'));
   if(!cards.length)return;
+  // No markers, sticky measurements, scroll transforms, or wheel interception
+  // on mobile/tablet. The original section anchors stay in document flow.
+  if(plainScroll){
+   const go=(id:string)=>{
+    const target=cards.find(card=>card.id===id);
+    if(!target)return;
+    if(window.location.hash!=='#'+id){
+     window.history.pushState(null,'','#'+id);
+    }
+    setActive(id);
+    target.scrollIntoView({
+     behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',
+     block:'start'
+    });
+   };
+   navigateSectionRef.current=go;
+   const observer=('IntersectionObserver' in window)
+    ?new IntersectionObserver(entries=>{
+      for(const entry of entries){
+       if(entry.isIntersecting)setActive(entry.target.id);
+      }
+     },{rootMargin:'-20% 0px -62% 0px',threshold:0})
+    :null;
+   cards.forEach(card=>observer?.observe(card));
+   let progressFrame=0;
+   const updateProgress=()=>{
+    progressFrame=0;
+    const range=document.documentElement.scrollHeight-window.innerHeight;
+    const fraction=range>0?Math.min(1,Math.max(0,window.scrollY/range)):0;
+    if(progressRef.current){
+     progressRef.current.style.transform='scaleX('+fraction+')';
+    }
+   };
+   const queueProgress=()=>{
+    if(!progressFrame)progressFrame=window.requestAnimationFrame(updateProgress);
+   };
+   window.addEventListener('scroll',queueProgress,{passive:true});
+   window.addEventListener('resize',queueProgress);
+   queueProgress();
+   return ()=>{
+    observer?.disconnect();
+    window.removeEventListener('scroll',queueProgress);
+    window.removeEventListener('resize',queueProgress);
+    if(progressFrame)window.cancelAnimationFrame(progressFrame);
+    navigateSectionRef.current=()=>{};
+   };
+  }
   const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
   let raf=0;
   let activeIndex=0;
@@ -270,5 +330,5 @@ export default function useCardDeck(
    });
    main.classList.remove('scroll-stack-ready');
   };
- },[setActive,progressRef,navigateSectionRef]);
+ },[setActive,progressRef,navigateSectionRef,plainScroll]);
 }
