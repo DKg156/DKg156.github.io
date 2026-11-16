@@ -91,31 +91,29 @@ export default function App(){
      if(frame)window.cancelAnimationFrame(frame);
    };
  },[]);
- // Keep stacked cards readable even when a section is taller than the viewport.
- // Its sticky offset becomes negative only after all of its content can scroll by.
- // ResizeObserver also covers project filtering, expanded skills, and font loading.
+ // Animate only the incoming card. Normal document flow keeps the previous
+ // card from stacking behind it, and the gap gives readers room to finish.
+ // The observer runs only once per card and never hijacks scrolling.
  useEffect(()=>{
-   const main=document.querySelector<HTMLElement>('#main');
-   if(!main||!('ResizeObserver' in window))return;
-   const cards=Array.from(main.querySelectorAll<HTMLElement>(':scope > section'));
-   const observer=new ResizeObserver(entries=>{
+   if(!('IntersectionObserver' in window)||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+   const cards=Array.from(document.querySelectorAll<HTMLElement>('#main > section'));
+   const observer=new IntersectionObserver(entries=>{
      for(const entry of entries){
-       const card=entry.target as HTMLElement;
-       const height=card.offsetHeight+'px';
-       if(card.style.getPropertyValue('--stack-card-height')!==height){
-         card.style.setProperty('--stack-card-height',height);
-       }
+       if(!entry.isIntersecting)continue;
+       entry.target.classList.remove('flip-pending');
+       observer.unobserve(entry.target);
      }
-   });
-   for(const card of cards){
-     card.style.setProperty('--stack-card-height',card.offsetHeight+'px');
+   },{rootMargin:'0px 0px -22% 0px',threshold:0});
+   // The landing card is visible immediately. Other cards are revealed once
+   // they reach the lower reading area, after the preceding card's buffer.
+   cards.slice(1).forEach(card=>{
+     card.classList.add('flip-pending');
      observer.observe(card);
-   }
-   main.classList.add('scroll-stack-ready');
+   });
    return ()=>{
      observer.disconnect();
-     main.classList.remove('scroll-stack-ready');
-     cards.forEach(card=>card.style.removeProperty('--stack-card-height'));
+     cards.forEach(card=>card.classList.remove('flip-pending'));
    };
  },[]);
  useEffect(()=>{const saved=localStorage.getItem('dhruv-theme');if(saved==='light'||saved==='dark')setTheme(saved);},[]);
