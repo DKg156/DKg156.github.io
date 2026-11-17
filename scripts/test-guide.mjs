@@ -20,18 +20,18 @@ try {
   ['does he have production AI experience','Ovation Virtual Advisor'],
   ['what measurable impact has he delivered','15%'],
   ['is he a good fit for this role','job description'],
-  ['where is his resume','Resume button'],
-  ['resume','Resume button'],
-  ['can I see his resume','Resume button'],
-  ['show me his CV','Resume button'],
-  ['download résumé','Resume button'],
-  ['where can I download the curriculum vitae','Resume button'],
-  ['tell me about his resume','AI and backend engineering'],
-  ['what projects are in his resume','MedPred'],
-  ['what skills are on his resume','FastAPI'],
-  ['what education is on his resume','BITS Pilani'],
-  ['what experience is in his resume','Global Payments'],
-  ['what certification is on his resume','AWS Certified Cloud Practitioner'],
+  ['where is his resume','not available'],
+  ['resume','not available'],
+  ['can I see his resume','not available'],
+  ['show me his CV','not available'],
+  ['download résumé','not available'],
+  ['where can I download the curriculum vitae','not available'],
+  ['tell me about his resume','not available'],
+  ['what projects are in his resume','Projects section'],
+  ['what skills are on his resume','Technical Skills'],
+  ['what education is on his resume','Education section'],
+  ['what experience is in his resume','Experience section'],
+  ['what certification is on his resume','AWS Cloud Practitioner'],
   ['has he published research papers','does not list'],
   ['what datasets has he worked with','FaceForensics++'],
   ['what is his experience with LLM evaluation','15%'],
@@ -61,10 +61,21 @@ try {
   const actual=answer.text+' '+(answer.href||'');
   assert.ok(actual.toLowerCase().includes(expected.toLowerCase()),`Incorrect answer to "${question}": ${actual}`);
  }
- for(const question of ['resume','Can I see his CV?','download résumé','tell me about his resume','what projects are in his resume']){
+ const resumeRoutes=[
+  ['resume','#contact'],
+  ['Can I see his CV?','#contact'],
+  ['download résumé','#contact'],
+  ['tell me about his resume','#contact'],
+  ['what projects are in his resume','#projects'],
+  ['what skills are on his resume','#skills'],
+  ['what education is on his resume','#education'],
+  ['what experience is in his resume','#experience'],
+  ['what certification is on his resume','#education']
+ ];
+ for(const [question,expectedHref] of resumeRoutes){
   const answer=answerPortfolioQuestion(question);
-  assert.equal(answer.href,'/assets/Dhruv_Khurana_resume.pdf',`Broken résumé link for "${question}"`);
-  assert.equal(answer.label,'Open Resume');
+  assert.equal(answer.href,expectedHref,`Incorrect portfolio destination for "${question}"`);
+  assert.doesNotMatch(answer.text+' '+(answer.href||''),/\.pdf|open resume|resume button/i);
  }
  assert.doesNotMatch(answerPortfolioQuestion('what projects has he built').text,/MedPred/);
  const plant=answerPortfolioQuestion('tell me about Plantspector');
