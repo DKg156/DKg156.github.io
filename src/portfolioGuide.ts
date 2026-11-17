@@ -47,7 +47,6 @@ const intents:Intent[]=[
  {id:'production_ai',phrases:['production ai experience','production ai','production systems','production grade ai','production-grade ai','real world ai','real-world ai','enterprise ai experience','has he built ai applications'],keywords:[],answer:()=>({text:`The portfolio describes work on production-grade Generative AI capabilities for ${job.company}'s Ovation Virtual Advisor, including RAG, multi-agent workflows, and inference profiling. It does not publish service-level metrics or deployment architecture.`,href:'#experience',label:'Experience'})},
  {id:'measurable_impact',phrases:['measurable impact','measurable results','quantified impact','what impact','what achievements','key achievements','performance improvement','15 percent improvement','15% improvement'],keywords:[],answer:()=>({text:'The portfolio reports a 15% improvement in domain-specific evaluation performance from LoRA fine-tuning of Llama 3.1 70B and Qwen3 14B. It does not publish a detailed evaluation protocol or other quantified business outcomes.',href:'#experience',label:'Experience'})},
  {id:'role_fit',phrases:['fit for our role','fit for this role','fit for the job','match for our team','suitable for ai engineer','is he suitable','can he do this job','can you evaluate his fit'],keywords:[],answer:()=>({text:'I can summarize relevant experience, but cannot evaluate fit without a job description. The portfolio documents RAG, fine-tuning, agents, backend APIs and AI tooling. Please compare those with your requirements and contact Dhruv for a technical discussion.',href:'#contact',label:'Contact Me'})},
- {id:'resume',phrases:['resume download','download resume','his resume','his cv','download cv','curriculum vitae','where is his resume'],keywords:[],answer:()=>({text:'The Resume button in the site header opens Dhruv’s résumé PDF in a new tab.',href:'/assets/Dhruv_Khurana_resume.pdf',label:'Open Resume'})},
  {id:'research_publications',phrases:['research papers','published research','research publications','has he published','publications','academic papers','journal papers'],keywords:[],answer:()=>({text:'The portfolio describes a master’s degree and machine-learning projects, but does not list any published research papers. It would be inaccurate to claim publications without a source.',href:'#education',label:'Education'})},
  {id:'datasets',phrases:['what datasets','which datasets','training datasets','data sets','datasets used','datasets has he worked with','faceforensics++ dataset','celeb-df dataset'],keywords:[],answer:()=>({text:'The Deepfake Detection project explicitly names FaceForensics++ and Celeb-DF as training/validation datasets. The portfolio does not name a specific dataset for Plantspector. The SHL project uses an indexed SHL assessment catalog.',href:'#projects',label:'Projects'})},
  {id:'model_evaluation',phrases:['llm evaluation','model evaluation','evaluate models','evaluation metrics','evaluation performance','how did he evaluate','testing ai models','benchmarking models'],keywords:[],answer:()=>({text:'The portfolio reports a 15% improvement in domain-specific evaluation performance after LoRA fine-tuning. Specific benchmark names, sample sizes and evaluation methods are not published.',href:'#experience',label:'Experience'})},
@@ -102,30 +101,24 @@ export function answerPortfolioQuestion(input:string,previousTopic?:string):Guid
  if(['salary','compensation','ctc','phone','mobile number','age','relationship','notice period','availability','is he available','when can he join','joining date','start date','personal life','home address'].some(phrase=>includesPhrase(query,phrase))){
   return {text:"That information isn't published on this portfolio. For professional inquiries, please use the contact links.",href:'#contact',label:'Contact Me'};
  }
- // Handle resume/CV questions directly; generic intent matching otherwise misses "resume" alone.
- // Resume-specific details below reflect the published PDF, not the separate featured project list.
+ // Resume/CV requests lead to public portfolio sections, never a PDF.
  if(['resume','cv','curriculum vitae'].some(term=>includesPhrase(query,term))){
-  const href='/assets/Dhruv_Khurana_resume.pdf';
-  const withPdf=(text:string):GuideAnswer=>({text,href,label:'Open Resume'});
   if(['projects','project'].some(term=>includesPhrase(query,term))){
-   return withPdf('The résumé lists Deepfake Detection (Xception and CLIP), Plantspector (ResNet-50 and EDSR), and MedPred (Decision Tree and LightGBM). Open the PDF to see the full descriptions.');
+   return {text:'Featured work and technologies are described in the Projects section.',href:'#projects',label:'Projects'};
   }
   if(['skills','technologies','tech stack'].some(term=>includesPhrase(query,term))){
-   return withPdf('The résumé lists Python, Java and C++, plus RAG, LLM fine-tuning, Haystack, LangChain, FastAPI, ChromaDB, FAISS, PyTorch, TensorFlow, Docker, Azure and AWS, among other skills.');
+   return {text:'The Technical Skills section lists the technologies used in Dhruv’s work.',href:'#skills',label:'Technical Skills'};
   }
   if(['education','degree','qualification','university'].some(term=>includesPhrase(query,term))){
-   return withPdf('The résumé lists an M.E. in Software Systems from BITS Pilani (2023–2025) and a B.Tech in Computer Science & Engineering from Amity University, Noida (2018–2022).');
+   return {text:'Degrees and educational background are available in the Education section.',href:'#education',label:'Education'};
   }
   if(['experience','jobs','work history','employment'].some(term=>includesPhrase(query,term))){
-   return withPdf('The résumé lists AI Engineer at Emerson (April 2026–present) and Associate Software Engineer at Global Payments (July 2022–July 2023).');
+   return {text:'Professional experience is described in the Experience section.',href:'#experience',label:'Experience'};
   }
   if(['certification','certifications','certified'].some(term=>includesPhrase(query,term))){
-   return withPdf('The résumé lists the AWS Certified Cloud Practitioner certification.');
+   return {text:'The AWS Cloud Practitioner certification is listed in the Education section.',href:'#education',label:'Education'};
   }
-  if(['summary','summarize','summarise','overview','contains','included','about','tell','what is in'].some(term=>includesPhrase(query,term))){
-   return withPdf('Dhruv’s résumé covers AI and backend engineering experience at Emerson and Global Payments, an M.E. from BITS Pilani, ML projects, technical skills and AWS Cloud Practitioner certification.');
-  }
-  return withPdf('You can view Dhruv’s résumé PDF using the Resume button in the site header or the Open Resume link below.');
+  return {text:'A résumé PDF is not available on this website. You can explore experience, projects, skills, and education here, or get in touch for more information.',href:'#contact',label:'Contact Me'};
  }
  // Direct navigation maps destinations to their actual anchors.
  const destinations=[
